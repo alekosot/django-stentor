@@ -1,0 +1,9 @@
+{% spaceless %}
+  {% if is_anonymous_view %}
+    {{ newsletter.get_absolute_url }}
+  {% else %}
+    {% verbatim %}
+      {{ sending.get_web_view_url }}
+    {% endverbatim %}
+  {% endif %}
+{% endspaceless %}

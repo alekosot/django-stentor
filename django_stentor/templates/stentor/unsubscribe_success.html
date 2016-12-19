@@ -1,0 +1,20 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>{% trans "Διαγραφήκατε με επιτυχία" %} - {{ request.META.HTTP_HOST }}?></title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css %}" media="screen" />
+</head>
+
+<body>
+
+<div id="wrap">
+    <a href="http://{{ request.META.HTTP_HOST }}">
+        <img src="{% static 'img/logo.jpg' %}" style="padding-left:20px; padding-top:20px" border="0" />
+    </a>
+    <p>{% trans "Διαγραφήκατε από τη λίστα παραληπτών με επιτυχία." %}</p>
+</div>
+
+</body>
+</html>

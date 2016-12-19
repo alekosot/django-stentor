@@ -1,0 +1,25 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>{% trans "Σελίδα Διαγραφής" %} - {{ request.META.HTTP_HOST }}?></title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css %}" media="screen" />
+</head>
+
+<body>
+
+<div id="wrap">
+    <a href="http://{{ request.META.HTTP_HOST }}">
+        <img src="{% static 'img/logo.jpg' %}" style="padding-left:20px; padding-top:20px" border="0" />
+    </a>
+    <p>{% trans "Παρακαλούμε, συμπληρώστε το email σας στο παρακάτω πεδίο για να διαγραφείτε από τη λίστα μας:" %}</p>
+    <form action="" method="post" name="the_form">
+        {% csrf_token %}
+        <input type="text" name="email"  class="txtField" />
+        &nbsp; <input type="image" src="{{ STATIC_URL }}img/unsubscribe_{{ language }}.jpg" />
+    </form>
+</div>
+
+</body>
+</html>
