@@ -3,6 +3,8 @@
 
 from setuptools import setup
 
+from stentor import __author__, __email__, __version__
+
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
@@ -19,17 +21,18 @@ test_requirements = [
 
 setup(
     name='django_stentor',
-    version='0.1.0',
+    version=__version__,
     description="A newsletter/mailing app for django.",
     long_description=readme + '\n\n' + history,
-    author="Alex Sotiriou",
-    author_email='a.sotiriou@difio.gr',
+    author=__author__,
+    author_email=__email__,
     url='https://github.com/alxs/django_stentor',
     packages=[
         'django_stentor',
     ],
-    package_dir={'django_stentor':
-                 'django_stentor'},
+    package_dir={
+        'django_stentor': 'django_stentor'
+    },
     include_package_data=True,
     install_requires=requirements,
     license="BSD license",
