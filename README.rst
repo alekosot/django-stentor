@@ -15,6 +15,7 @@ Features
 * Mailing lists
 * Subscribers registered on multiple mailing lists
 * HTML based emails
+* Scheduled sending of newsletters (send in the future)
 * Newsletter templates
 * Newsletters that can be viewed on the browser (aka web views)
 * Tracking of email and web "impressions" of sent newsletters
@@ -39,7 +40,7 @@ TODO
 * Make models as extensible as possible, taking into account the possibility of model subclasses.
 
 *Constant efforts*
-* Simplicity, ideally this should be almost a plug-and-play app
+* Simplicity, ideally this should be a plug-and-play app
 * Configuration/extensibility without sacrificing simplicity (if possible)
 * Documentation
 
