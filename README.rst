@@ -7,6 +7,31 @@ A newsletter/mailing app for django.
 
 **Currently in Pre-Alpha version. Most functionalities are working but the API is not stable and anything could change at any point.**
 
+How to Install
+--------------
+
+Install in your virtual environment with:
+
+.. code:: bash
+
+  $ pip install git+https://github.com/alxs/django-stentor.git#egg=django-stentor
+
+
+How to Use
+----------
+
+Add ``'stentor'`` in your INSTALLED_APPS:
+
+.. code:: python
+
+  INSTALLED_APPS = (
+    # ...
+    'stentor'
+    #...
+  )
+
+Create the MailingLists that correspond to the names given in the ``STENTOR_DEFAULT_MAILING_LISTS`` setting (``['default']`` by default).
+
 
 Features
 --------
@@ -18,7 +43,8 @@ Features
 * Scheduled sending of newsletters (send in the future)
 * Newsletter templates
 * Newsletters that can be viewed on the browser (aka web views)
-* Tracking of email and web "impressions" of sent newsletters
+* Tracking of email and web "impressions" of sent newsletters (currently buggy)
+* Obfuscation backends for publicly visible database values
 * Many settings and hooks for tweaking the behavior of the app, with reasonable defaults, so that you don't get lost in configuration.
 
 
