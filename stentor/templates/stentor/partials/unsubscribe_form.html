@@ -1,0 +1,17 @@
+{% load i18n %}
+
+<form id="stentor-unsubscribe-form" action="" method="post">
+  {% csrf_token %}
+  {% for field in form %}
+    {% if not field.is_hidden %}
+      {{ field.label_tag }}
+    {% endif %}
+
+    {{ field }}
+
+    {% if not field.is_hidden %}
+      {{ field.errors }}
+    {% endif %}
+  {% endfor %}
+  <button type="submit" name="submit">{% trans "Unsubscribe" %}</button>
+</form>
