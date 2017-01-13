@@ -8,7 +8,7 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
+from django.urls import reverse_lazy
 from django.db import models
 from django.template import Template, Context
 from django.utils import timezone
@@ -18,7 +18,7 @@ from django.utils.text import slugify
 
 from . import settings as stentor_conf
 from . import managers as stentor_managers
-from . import utils as stentor_utils
+from .utils import obfuscator, subscribe as subscribe_util
 
 
 @python_2_unicode_compatible
@@ -82,8 +82,7 @@ class Subscriber(models.Model):
         return self.email or self.user.email
 
     def subscribe(self, mailing_lists=None):
-        return stentor_utils.subscribe(
-            email=self.email, mailing_lists=mailing_lists)
+        return subscribe_util(email=self.email, mailing_lists=mailing_lists)
 
     def unsubscribe(self, mailing_lists=None):
         self.is_active = False
@@ -102,16 +101,11 @@ class Subscriber(models.Model):
         """
         Note that the resolution of dates below is only down to day.
         """
-        request_day = timezone.now().toordinal()
-        subscribed_day = self.creation_date.toordinal()
-
-        # NOTE: This is intentionally different than the hash for web views.
-        unsubscribe_hash = stentor_utils.hasher\
-            .encode(date_created_int, self.pk)
-        return reverse(
-            'stentor.subscriber.unsubscribe',
+        unsubscribe_hash = obfuscator.encode_unsubscribe_hash(self)
+        return reverse_lazy(
+            'stentor:subscriber.unsubscribe',
             kwargs={'unsubscribe_hash': unsubscribe_hash},
-            urlconf=stentor_conf.PUBLIC_URLCONF
+            urlconf=stentor_conf.PUBLIC_URLCONF,
         )
 
 
@@ -153,7 +147,7 @@ class Newsletter(models.Model):
                 'least one subscriber to send this newsletter to.'))
 
     def save(self, *args, **kwargs):
-        stentor_slugify = stentor_conf.NEWSLETTER_SLUGIFY
+        stentor_slugify = stentor_conf.SLUGIFY
         if stentor_slugify is not None:
             if stentor_slugify:
                 self.slug = stentor_slugify(self)
@@ -167,11 +161,9 @@ class Newsletter(models.Model):
 
     def get_absolute_url(self, sending=None):
         if sending:
-            subscriber_hash = stentor_utils.hasher.encode(
-                sending.subscriber.id
-            )
-            url = reverse(
-                'stentor.newsletter.subscriber_web_view',
+            subscriber_hash = obfuscator.encode_web_view_hash(sending)
+            url = reverse_lazy(
+                'stentor:newsletter.subscriber_web_view',
                 kwargs={
                     'newsletter_slug': self.slug,
                     'subscriber_hash': subscriber_hash
@@ -179,8 +171,8 @@ class Newsletter(models.Model):
                 urlconf=stentor_conf.PUBLIC_URLCONF
             )
         else:
-            url = reverse(
-                'stentor.newsletter.anonymous_web_view',
+            url = reverse_lazy(
+                'stentor:newsletter.anonymous_web_view',
                 kwargs={'newsletter_slug': self.slug},
                 urlconf=stentor_conf.PUBLIC_URLCONF
             )
@@ -225,11 +217,9 @@ class Newsletter(models.Model):
         scheduled_sendings.send_and_delete()
 
     def get_email_tracker_url(self, sending):
-        subscriber_hash = stentor_utils.hasher.encode(
-            sending.subscriber.id
-        )
-        return reverse(
-            'stentor.newsletter.email_view_tracker',
+        subscriber_hash = obfuscator.encode_email_tracker_hash(sending)
+        return reverse_lazy(
+            'stentor:newsletter.email_view_tracker',
             kwargs={
                 'newsletter_slug': self.slug,
                 'subscriber_hash': subscriber_hash
@@ -270,7 +260,7 @@ class Newsletter(models.Model):
             yield subscriber
 
     def get_all_subscribers(self, distinct=True, active_only=True):
-        subscribers = set()
+        distinct_subscribers = set()
         for mailing_list in self.get_mailing_lists():
             ml_subscribers = mailing_list.subscribers.all()
             if active_only:
@@ -279,14 +269,16 @@ class Newsletter(models.Model):
                 if not distinct:
                     yield subscriber
                 else:
-                    subscribers.add(subscriber)
+                    if subscriber not in distinct_subscribers:
+                        yield subscriber
+                        distinct_subscribers.add(subscriber)
         for subscriber in self.get_explicit_subscribers(active_only):
             if not distinct:
                 yield subscriber
             else:
-                subscribers.add(subscriber)
-        if distinct:
-            return subscribers
+                if subscriber not in distinct_subscribers:
+                    yield subscriber
+                    distinct_subscribers.add(subscriber)
 
 
 @python_2_unicode_compatible

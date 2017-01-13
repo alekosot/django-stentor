@@ -8,12 +8,28 @@ from django.db import models
 from django.utils import timezone
 
 from . import settings as stentor_conf
+from . import checks as stentor_checks
 
 
 class MailingListManager(models.Manager):
+    def check(self, **kwargs):
+        errors = super(MailingListManager, self).check(**kwargs)
+        default_mailing_lists = self.default()
+
+        errors.extend(
+            stentor_checks._default_mailing_lists_setting_is_valid(**kwargs)
+        )
+        errors.extend(
+            stentor_checks._default_mailing_lists_exist(
+                mailing_lists=default_mailing_lists, **kwargs
+            )
+        )
+
+        return errors
+
     def default(self):
         qs = self.get_queryset()
-        return qs.get(name=stentor_conf.DEFAULT_MAILING_LIST)
+        return qs.filter(name__in=stentor_conf.DEFAULT_MAILING_LISTS)
 
 
 class SubscriberQuerySet(models.QuerySet):
@@ -55,7 +71,6 @@ class ScheduledSendingQuerySet(models.QuerySet):
 
 
 class ScheduledSendingManager(models.Manager):
-
     def get_queryset(self):
         return ScheduledSendingQuerySet(self.model, using=self._db)
 

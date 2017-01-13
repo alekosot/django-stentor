@@ -4,52 +4,38 @@ from __future__ import unicode_literals
 from django.conf import settings
 
 
-# NOTE: These will be implemented in the future
-# ALLOW_ANONYMOUS_IDENTIFIER_FOR_WEB_VIEWS = True
-#
-# # Set this to an empty string if you want to disable public
-# ANONYMOUS_IDENTIFIER_FOR_WEB_VIEWS = '_public'
-
-DEFAULT_MAILING_LIST = getattr(
+DEFAULT_MAILING_LISTS = getattr(
     settings,
-    'STENTOR_DEFAULT_MAILING_LIST',
-    'default'
+    'STENTOR_DEFAULT_MAILING_LISTS',
+    ['default']
 )
 
-# TODO: This is essential and we want an error to be raised if it hasn't been
-# set. Throw an Exception if it is not set though, giving an easy solution to
-# overcome this.
-# TODO: Document the arguments passed to this callable.
-HASH_GENERATOR = settings.STENTOR_HASH_GENERATOR
+OBFUSCATION_BACKEND = getattr(
+    settings,
+    'STENTOR_OBFUSCATION',
+    'stentor.obfuscation.dummy.backend'
+)
 
-# TODO: Add logging
-# LOGGING = getattr(
-#     settings,
-#     'STENTOR_LOGGING',
-#     'default'
-# )
+OBFUSCATION_SETTINGS = getattr(
+    settings,
+    'OBFUSCATION_SETTINGS',
+    {}
+)
 
+# TODO: Rename to STENTOR_SLUGIFY
 # If set to None, no slugify will take place. If set to False,
 # django.utils.text.slugify will be used with the newsletter subject as input
 # and allow_unicode set to False. If set to True, the callable will be passed
 # the Newsletter instance, so account for it.
-NEWSLETTER_SLUGIFY = getattr(
+SLUGIFY = getattr(
     settings,
-    'STENTOR_NEWSLETTER_SLUGIFY',
+    'STENTOR_SLUGIFY',
     False
 )
 
-
-# NOTE: This is currently useless, but if base/example templates are given this
-# could make the templates easily reusable.
-# TODO: This is essential and we want an error to be raised if it hasn't been
-# set. Make it more clever however, with checking for django.contrib.sites app
-# and fetching the url from there.
-# PUBLIC_HTTP_HOST = settings.STENTOR_PUBLIC_HTTP_HOST
-
-# This is used in cases where the "admin site" where the creation of
-# newsletter takes place is different than the "public site" where email views
-# of newsletter take place.
+# This is used in cases where the "admin/cms site" where the creation of
+# newsletters takes place is different than the "public site" where email views
+# of newsletters take place.
 PUBLIC_URLCONF = getattr(
     settings,
     'STENTOR_PUBLIC_URLCONF',
@@ -82,18 +68,10 @@ SCHEDULED_SENDING_BATCH_SIZE = getattr(
     250
 )
 
-
 if SENDER_NAME:
     SENDER_VERBOSE = '{} <{}>'.format(SENDER_NAME, SENDER_EMAIL)
 else:
     SENDER_VERBOSE = SENDER_EMAIL
-
-# TODO: What's the use case scenario for this? Remove if useless
-# SUBSCRIPTION_BACKEND = getattr(
-#     settings,
-#     'STENTOR_SUBSCRIPTION_BACKEND',
-#     'newsletter.backends.filebased.SubscriptionBackend'
-# )
 
 SUBSCRIBE_FORM = getattr(
     settings,
