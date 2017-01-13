@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock title %}Django Stentor Test Project</title>
+    <style media="screen">
+      #main-nav ul {
+        display: inline-block;
+      }
+      #main-nav li {
+        display: inline-block;
+      }
+    </style>
+    {% block head_end %}
+    {% endblock head_end %}
+  </head>
+  <body>
+    {% block body_start %}
+    {% endblock body_start %}
+
+    <h1>Stentor test project</h1>
+
+    <hr>
+
+    <nav id="main-nav">
+      <strong>Navigation:</strong>
+      <ul>
+        <li>
+          <a href="{% url 'stentor:subscriber.subscribe' %}">Subscribe</a>
+        </li>
+        {% if unsubscribing_subscriber %}
+          <li>
+            <a href="{{ unsubscribing_subscriber.get_unsubscribe_url }}">Unsubscribe the first subscriber</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+
+    <hr>
+
+    <br>
+    <br>
+
+    {% block stentor_subscribe_form %}
+    {% endblock stentor_subscribe_form %}
+
+    {% block stentor_unsubscribe_form %}
+    {% endblock stentor_unsubscribe_form %}
+
+    <script src="https://cdn.jsdelivr.net/jquery/3.1.1/jquery.min.js"></script>
+
+    {% block body_end %}
+    {% endblock body_end %}
+  </body>
+</html>

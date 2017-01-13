@@ -1,0 +1,47 @@
+{% extends "stentor/subscribe.html" %}
+
+{% block stentor_subscribe_form %}
+  <h2>Subscribe form</h2>
+  {{ block.super }}
+  <br>
+  <label for="stentor-ajax-request">
+    <input id="stentor-ajax-request" type="checkbox" name="ajax" value="1">
+    Do an AJAX request
+  </label>
+{% endblock stentor_subscribe_form %}
+
+
+{% block body_end %}
+  <script>
+    jQuery(document).ready(function($){
+      var $form = $('#stentor-subscribe-form');
+
+      $form.find('input').removeAttr('required');
+      $form.on('submit', function(e){
+        if (!$('#stentor-ajax-request').prop('checked')) {
+          return;
+        }
+        e.preventDefault();
+        var data = $form.serialize();
+
+        $.ajax('{% url "stentor:subscriber.subscribe" %}', {
+            method: 'POST',
+            data: data
+        })
+        .then(
+            function success(data) {
+                console.log(data);
+                $form.after('<p>Subscription of ' + data.email + ' was successful</p>');
+                $form.html(data.html);
+            },
+
+            function fail(data, status) {
+                console.log('fail', data, status);
+                alert('Request failed.  Returned status of ' + status);
+            }
+        );
+
+      });
+    });
+  </script>
+{% endblock body_end %}

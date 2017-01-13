@@ -1,0 +1,47 @@
+{% extends "stentor/unsubscribe.html" %}
+
+{% block stentor_unsubscribe_form %}
+  <h2>Unsubscribe form</h2>
+  {{ block.super }}
+  <br>
+  <label for="stentor-ajax-request">
+    <input id="stentor-ajax-request" type="checkbox" name="ajax" value="1">
+    Do an AJAX request
+  </label>
+{% endblock stentor_unsubscribe_form %}
+
+
+{% block body_end %}
+  <script>
+    jQuery(document).ready(function($){
+      var $form = $('#stentor-unsubscribe-form');
+
+      $form.find('input').removeAttr('required');
+      $form.on('submit', function(e){
+        if (!$('#stentor-ajax-request').prop('checked')) {
+          return;
+        }
+        e.preventDefault();
+        var data = $form.serialize();
+
+        $.ajax('{{ unsubscribing_subscriber.get_unsubscribe_url }}', {
+            method: 'POST',
+            data: data
+        })
+        .then(
+            function success(data) {
+                console.log('SUCCESS', data);
+                $form.after('<p>' + data.email + ' was successfully unsubscribed</p>');
+                $form.html(data.html);
+            },
+
+            function fail(data, status) {
+                console.log('FAILURE', data, status);
+                alert('Request failed.  Returned status of ' + status);
+            }
+        );
+
+      });
+    });
+  </script>
+{% endblock body_end %}
