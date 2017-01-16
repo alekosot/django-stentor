@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.core import checks
+from django.db.utils import DatabaseError
 from django.utils import six
 
 from stentor import settings as stentor_conf
@@ -31,7 +32,13 @@ def _default_mailing_lists_setting_is_valid(**kwargs):
 
 def _default_mailing_lists_exist(**kwargs):
     mailing_lists = kwargs.pop('mailing_lists')
-    if mailing_lists.count() != len(stentor_conf.DEFAULT_MAILING_LISTS):
+    try:
+        total_mailing_lists = mailing_lists.count()
+    except DatabaseError:
+        # Migrations have not been ran yet, ignore the check, so that the
+        # table is created and the instances needed can be created.
+        return []
+    if total_mailing_lists != len(stentor_conf.DEFAULT_MAILING_LISTS):
         return [
             checks.Warning(
                 'Default MailingLists do not exist',
