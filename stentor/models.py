@@ -25,7 +25,7 @@ from .utils import obfuscator, subscribe as subscribe_util
 class MailingList(models.Model):
     """
     """
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
 
     objects = stentor_managers.MailingListManager()
 
