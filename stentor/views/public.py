@@ -61,7 +61,7 @@ class SubscriptionFormMixin(object):
             )
             data = {
                 'html': html,
-                'email': form.cleaned_data['email'],
+                'email': '',  # This should be invalid
                 'errors': form.errors,
             }
             return JsonResponse(data, status=400)
