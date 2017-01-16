@@ -28,10 +28,10 @@ setup(
     author_email=__email__,
     url='https://github.com/alxs/django_stentor',
     packages=[
-        'django_stentor',
+        'django-stentor',
     ],
     package_dir={
-        'django_stentor': 'django_stentor'
+        'django-stentor': 'stentor'
     },
     include_package_data=True,
     install_requires=requirements,

@@ -14,7 +14,7 @@ Install in your virtual environment with:
 
 .. code:: bash
 
-  $ pip install git+https://github.com/alxs/django-stentor.git#egg=django-stentor
+  $ pip install -e git+https://github.com/alxs/django-stentor.git#egg=stentor
 
 
 How to Use
