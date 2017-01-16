@@ -25,7 +25,13 @@ TRANSPARENT_1_PIXEL_GIF = '\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\
 class AjaxTemplateMixin(object):
     def get_template_names(self):
         if self.request.is_ajax():
-            return [self.ajax_template_name]
+            templates = []
+            try:
+                templates.append(self.ajax_success_template_name)
+            except AttributeError:
+                pass
+            templates.append(self.template_name)
+            return templates
         return [self.template_name]
 
 
@@ -62,11 +68,17 @@ class SubscriptionFormMixin(object):
         return response
 
 
+class SubscribeSuccessView(AjaxTemplateMixin, TemplateView):
+    template_name = 'stentor/subscribe_success.html'
+    ajax_template_name = 'stentor/partials/subscribe_success_message.html'
+
+
 class SubscribeView(AjaxTemplateMixin, SubscriptionFormMixin, FormView):
     form_class = import_string(stentor_conf.SUBSCRIBE_FORM)
     success_url = reverse_lazy('stentor:subscriber.subscribe_success')
     template_name = 'stentor/subscribe.html'
     ajax_template_name = 'stentor/partials/subscribe_form.html'
+    ajax_success_template_name = SubscribeSuccessView.ajax_template_name
 
     def get_context_data(self, **kwargs):
         out = super(SubscribeView, self).get_context_data(**kwargs)
@@ -74,9 +86,9 @@ class SubscribeView(AjaxTemplateMixin, SubscriptionFormMixin, FormView):
         return out
 
 
-class SubscribeSuccessView(AjaxTemplateMixin, TemplateView):
-    template_name = 'stentor/subscribe_success.html'
-    ajax_template_name = 'stentor/partials/subscribe_success_message.html'
+class UnsubscribeSuccessView(AjaxTemplateMixin, TemplateView):
+    template_name = 'stentor/unsubscribe_success.html'
+    ajax_template_name = 'stentor/partials/unsubscribe_success_message.html'
 
 
 class UnsubscribeView(AjaxTemplateMixin, SubscriptionFormMixin, FormView):
@@ -84,6 +96,7 @@ class UnsubscribeView(AjaxTemplateMixin, SubscriptionFormMixin, FormView):
     success_url = reverse_lazy('stentor:subscriber.unsubscribe_success')
     template_name = 'stentor/unsubscribe.html'
     ajax_template_name = 'stentor/partials/unsubscribe_form.html'
+    ajax_success_template_name = UnsubscribeSuccessView.ajax_template_name
 
     def dispatch(self, request, *args, **kwargs):
         out = super(UnsubscribeView, self).dispatch(request, *args, **kwargs)
@@ -105,11 +118,6 @@ class UnsubscribeView(AjaxTemplateMixin, SubscriptionFormMixin, FormView):
             'unsubscribe_hash': self.kwargs['unsubscribe_hash']
         }
         return initial
-
-
-class UnsubscribeSuccessView(AjaxTemplateMixin, TemplateView):
-    template_name = 'stentor/unsubscribe_success.html'
-    ajax_template_name = 'stentor/partials/unsubscribe_success_message.html'
 
 
 def _newsletter_web_view(request, newsletter_slug, subscriber=None):

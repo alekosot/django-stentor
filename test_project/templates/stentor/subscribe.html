@@ -31,7 +31,6 @@
         .then(
             function success(data) {
                 console.log(data);
-                $form.after('<p>Subscription of ' + data.email + ' was successful</p>');
                 $form.html(data.html);
             },
 

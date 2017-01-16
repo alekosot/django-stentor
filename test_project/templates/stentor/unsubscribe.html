@@ -31,7 +31,6 @@
         .then(
             function success(data) {
                 console.log('SUCCESS', data);
-                $form.after('<p>' + data.email + ' was successfully unsubscribed</p>');
                 $form.html(data.html);
             },
 
