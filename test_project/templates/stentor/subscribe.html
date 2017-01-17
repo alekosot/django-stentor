@@ -25,21 +25,17 @@
         var data = $form.serialize();
 
         $.ajax('{% url "stentor:subscriber.subscribe" %}', {
-            method: 'POST',
-            data: data
+          method: 'POST',
+          data: data
         })
-        .then(
-            function success(data) {
-                console.log(data);
-                $form.html(data.html);
-            },
-
-            function fail(data, status) {
-                console.log('fail', data, status);
-                alert('Request failed.  Returned status of ' + status);
-            }
-        );
-
+        .done(function(data) {
+          console.log('SUCCESS', data);
+          $form.html(data.html);
+        })
+        .fail(function(data, status) {
+          console.log('FAILURE', data);
+          $form.html(data.responseJSON.html);
+        });
       });
     });
   </script>

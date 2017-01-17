@@ -2,6 +2,9 @@
 
 <form id="stentor-unsubscribe-form" action="" method="post">
   {% csrf_token %}
+
+  {{ form.non_field_errors }}
+
   {% for field in form %}
     {% if not field.is_hidden %}
       {{ field.label_tag }}

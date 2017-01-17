@@ -5,7 +5,9 @@ The views for all public facing urls of the application.
 """
 from __future__ import unicode_literals
 
-from django.core.urlresolvers import reverse_lazy
+import importlib
+
+from django.core.urlresolvers import reverse_lazy, resolve
 from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.template import Template, Context
@@ -25,43 +27,48 @@ TRANSPARENT_1_PIXEL_GIF = '\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\
 class AjaxTemplateMixin(object):
     def get_template_names(self):
         if self.request.is_ajax():
-            templates = []
-            try:
-                templates.append(self.ajax_success_template_name)
-            except AttributeError:
-                pass
-            templates.append(self.template_name)
-            return templates
+            return [self.ajax_template_name]
         return [self.template_name]
 
 
-class SubscriptionFormMixin(object):
+class SubscriptionHandlingMixin(object):
     def form_valid(self, form):
-        response = super(SubscriptionFormMixin, self).form_valid(form)
+        response = super(SubscriptionHandlingMixin, self).form_valid(form)
         form.save()
         if self.request.is_ajax():
+            # Fetch the template from the view that handles successful
+            # submissions of this view redirect to.
+            view_func = resolve(self.get_success_url()).func
+            module = importlib.import_module(view_func.__module__)
+            view = getattr(module, view_func.__name__)
+            template = view.ajax_template_name
+
             html = render_to_string(
-                self.get_template_names(),
-                {'form': form}
+                template,
+                {'form': form},
+                self.request
             )
             data = {
+                'success': True,
                 'html': html,
-                'email': form.cleaned_data['email'],
+                'cleaned_data': form.cleaned_data,
                 'errors': form.errors  # should be empty
             }
             return JsonResponse(data)
         return response
 
     def form_invalid(self, form):
-        response = super(SubscriptionFormMixin, self).form_invalid(form)
+        response = super(SubscriptionHandlingMixin, self).form_invalid(form)
         if self.request.is_ajax():
             html = render_to_string(
                 self.get_template_names(),
-                {'form': form}
+                {'form': form},
+                self.request
             )
             data = {
+                'success': False,
                 'html': html,
-                'email': '',  # This should be invalid
+                'cleaned_data': form.cleaned_data,
                 'errors': form.errors,
             }
             return JsonResponse(data, status=400)
@@ -73,12 +80,11 @@ class SubscribeSuccessView(AjaxTemplateMixin, TemplateView):
     ajax_template_name = 'stentor/partials/subscribe_success_message.html'
 
 
-class SubscribeView(AjaxTemplateMixin, SubscriptionFormMixin, FormView):
+class SubscribeView(AjaxTemplateMixin, SubscriptionHandlingMixin, FormView):
     form_class = import_string(stentor_conf.SUBSCRIBE_FORM)
     success_url = reverse_lazy('stentor:subscriber.subscribe_success')
     template_name = 'stentor/subscribe.html'
     ajax_template_name = 'stentor/partials/subscribe_form.html'
-    ajax_success_template_name = SubscribeSuccessView.ajax_template_name
 
     def get_context_data(self, **kwargs):
         out = super(SubscribeView, self).get_context_data(**kwargs)
@@ -91,12 +97,11 @@ class UnsubscribeSuccessView(AjaxTemplateMixin, TemplateView):
     ajax_template_name = 'stentor/partials/unsubscribe_success_message.html'
 
 
-class UnsubscribeView(AjaxTemplateMixin, SubscriptionFormMixin, FormView):
+class UnsubscribeView(AjaxTemplateMixin, SubscriptionHandlingMixin, FormView):
     form_class = import_string(stentor_conf.UNSUBSCRIBE_FORM)
     success_url = reverse_lazy('stentor:subscriber.unsubscribe_success')
     template_name = 'stentor/unsubscribe.html'
     ajax_template_name = 'stentor/partials/unsubscribe_form.html'
-    ajax_success_template_name = UnsubscribeSuccessView.ajax_template_name
 
     def dispatch(self, request, *args, **kwargs):
         out = super(UnsubscribeView, self).dispatch(request, *args, **kwargs)
