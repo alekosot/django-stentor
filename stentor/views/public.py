@@ -51,7 +51,6 @@ class SubscriptionHandlingMixin(object):
             data = {
                 'success': True,
                 'html': html,
-                'cleaned_data': form.cleaned_data,
                 'errors': form.errors  # should be empty
             }
             return JsonResponse(data)
@@ -68,7 +67,6 @@ class SubscriptionHandlingMixin(object):
             data = {
                 'success': False,
                 'html': html,
-                'cleaned_data': form.cleaned_data,
                 'errors': form.errors,
             }
             return JsonResponse(data, status=400)
