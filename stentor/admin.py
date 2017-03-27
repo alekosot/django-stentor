@@ -24,7 +24,7 @@ class SubscriberAdmin(admin.ModelAdmin):
 class NewsletterAdmin(admin.ModelAdmin):
 
     fields = ('subject', 'template', 'mailing_lists', 'subscribers', 'slug')
-    list_display = ('subject', 'email_views')
+    list_display = ('subject', 'slug', 'email_views', 'web_views')
     actions = [schedule_sending]
 
 
