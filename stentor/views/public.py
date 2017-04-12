@@ -69,7 +69,7 @@ class SubscriptionHandlingMixin(object):
                 'html': html,
                 'errors': form.errors,
             }
-            return JsonResponse(data, status=400)
+            return JsonResponse(data)
         return response
 
 
