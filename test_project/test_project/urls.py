@@ -23,14 +23,13 @@ import debug_toolbar
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+
     url(r'^$', RedirectView.as_view(
         url=reverse_lazy('stentor:subscriber.subscribe')
     )),
 
     url(r'^', include('stentor.urls.public', namespace='stentor')),
     url(r'^', include('stentor.urls.private', namespace='stentor')),
-
-
 
     url(r'^__debug__/', include(debug_toolbar.urls)),
 ]
