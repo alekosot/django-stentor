@@ -7,7 +7,7 @@ from django.conf import settings
 DEFAULT_MAILING_LISTS = getattr(
     settings,
     'STENTOR_DEFAULT_MAILING_LISTS',
-    ['default']
+    ['Website subscribers']
 )
 
 OBFUSCATION_BACKEND = getattr(
@@ -33,9 +33,9 @@ SLUGIFY = getattr(
     False
 )
 
-# This is used in cases where the "admin/cms site" where the creation of
-# newsletters takes place is different than the "public site" where email views
-# of newsletters take place.
+# This is used in cases where the "admin/cms site", where the creation of
+# newsletters takes place, is different than the "public site" where web
+# views of newsletters take place.
 PUBLIC_URLCONF = getattr(
     settings,
     'STENTOR_PUBLIC_URLCONF',
@@ -83,9 +83,9 @@ TEMPLATES = getattr(
     settings,
     'STENTOR_TEMPLATES',
     {
-        'default': (
-            'newsletter_email.html',  # The first one is for email renders
-            'newsletter_web.html'  # The second one for web browser renders
+        'Custom': (
+            'stentor/newsletter/custom_email.html',  # template for email views
+            'stentor/newsletter/custom_web.html'  # template for web views
         )
     }
 )
