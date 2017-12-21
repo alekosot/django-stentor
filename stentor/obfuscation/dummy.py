@@ -24,7 +24,7 @@ class DummyObfuscationBackend(BaseObfuscationBackend):
 
     def encode_web_view_hash(self, sending):
         return '{}-{}'.format(
-            sending.sending.newsletter.pk,
+            sending.newsletter.pk,
             sending.subscriber.pk
         )
 
