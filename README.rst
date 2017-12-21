@@ -7,6 +7,13 @@ A newsletter/mailing app for django.
 
 **Currently in Pre-Alpha version. Most functionalities are working but the API is not stable and anything could change at any point.**
 
+Dependencies
+------------
+
+* PostgreSQL (stentor uses ``django.contrib.postgres.fields.ArrayField``)
+* ``django.contrib.sites``
+
+
 How to Install
 --------------
 
@@ -36,7 +43,6 @@ Create the MailingLists that correspond to the names given in the ``STENTOR_DEFA
 Features
 --------
 
-* No external dependencies
 * Mailing lists
 * Subscribers registered on multiple mailing lists
 * HTML based emails
