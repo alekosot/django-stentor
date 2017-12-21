@@ -20,10 +20,37 @@ class SubscriberAdmin(admin.ModelAdmin):
 
 @admin.register(Newsletter)
 class NewsletterAdmin(admin.ModelAdmin):
-    fields = ('subject', 'slug', 'template', 'mailing_lists', 'subscribers')
-    list_display = ('subject', 'slug', 'email_views', 'web_views')
+    fieldsets = (
+        (None, {
+            'fields': (
+                'subject', 'slug', 'template', 'mailing_lists', 'subscribers'
+            )
+        }),
+        ('Statistics', {
+            # TODO: Add description here, for further info about how to use
+            # this and what extra variables can be used
+            'fields': (
+                'total_pending_sendings', 'total_past_recipients',
+                'total_email_impressions', 'total_web_impressions', 'impression_rate'
+            ),
+        }),
+        ('Custom HTML', {
+            'classes': ('collapse',),
+            # TODO: Add description here, for further info about how to use
+            # this and what extra variables can be used
+            'fields': ('custom_email_html', 'custom_web_html'),
+        }),
+    )
+    list_display = (
+        'subject', 'slug', 'total_pending_sendings', 'total_past_recipients',
+        'total_email_impressions', 'total_web_impressions', 'impression_rate',
+    )
     actions = ('schedule_sending',)
     prepopulated_fields = {'slug': ('subject', )}
+    readonly_fields = (
+        'total_pending_sendings', 'total_past_recipients',
+        'total_email_impressions', 'total_web_impressions', 'impression_rate'
+    )
 
     def schedule_sending(self, request, queryset):
         for newsletter in queryset:

@@ -125,8 +125,8 @@ class UnsubscribeView(AjaxTemplateMixin, SubscriptionHandlingMixin, FormView):
 
 def _newsletter_web_view(request, newsletter_slug, subscriber=None):
     newsletter = get_object_or_404(Newsletter, slug=newsletter_slug)
-    newsletter.increment_web_views()
     is_anonymous_view = False if subscriber else True
+    newsletter.add_impression(subscriber, 'web')
     context_vars = {
         'newsletter': newsletter,
         'subscriber': subscriber,
@@ -149,11 +149,9 @@ def newsletter_web_view_from_anonymous(request, newsletter_slug):
     return _newsletter_web_view(request, newsletter_slug)
 
 
-# TODO - Design-decision needed: This does nothing with the Subscriber
-# instance, perhaps it should be more permissive?
 def newsletter_email_tracker(request, newsletter_slug, subscriber_hash):
     newsletter = get_object_or_404(Newsletter, slug=newsletter_slug)
     subscriber_pk, __ = obfuscator.decode_email_tracker_hash(subscriber_hash)
-    get_object_or_404(Subscriber, pk=subscriber_pk)
-    newsletter.increment_email_views()
+    subscriber = get_object_or_404(Subscriber, pk=subscriber_pk)
+    newsletter.add_impression(subscriber, 'email')
     return HttpResponse(TRANSPARENT_1_PIXEL_GIF, content_type="image/gif")

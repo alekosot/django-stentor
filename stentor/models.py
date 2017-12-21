@@ -4,17 +4,21 @@ TODO: Docstrings are a bit old.
 """
 from __future__ import unicode_literals
 
+from itertools import chain
+
 from django.conf import settings
-from django.core.mail import EmailMessage
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
+from django.core.mail import EmailMessage
 from django.core.mail import send_mail
-from django.urls import reverse_lazy
 from django.db import models
 from django.template import Template, Context
+from django.urls import reverse_lazy
 from django.utils import timezone
-from django.utils.translation import ugettext as _
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.functional import cached_property
 from django.utils.text import slugify
+from django.utils.translation import ugettext as _
 
 from . import settings as stentor_conf
 from . import managers as stentor_managers
@@ -117,16 +121,38 @@ class Newsletter(models.Model):
     TEMPLATE_CHOICES = tuple((name, name) for name in stentor_conf.TEMPLATES)
 
     subject = models.CharField(max_length=255)
-    mailing_lists = models.ManyToManyField(MailingList, blank=True)
-    subscribers = models.ManyToManyField(Subscriber, blank=True)
+    mailing_lists = models.ManyToManyField(
+        MailingList, blank=True, help_text=_(
+            'Select the mailing lists, to the subscribers of which, the '
+            'newsletter should be sent to. If a subscriber is in more than '
+            'one mailing list, the newsletter will be sent only once to '
+            'them.'))
+    subscribers = models.ManyToManyField(
+        Subscriber, blank=True, related_name='explicitly_assigned_newsletters',
+        help_text=_(
+            'Additional subscribers where the newsletter should be sent to. '
+            'If the selected subscribers are in any selected mailing lists, '
+            'the newletter will still be sent only once to them.'))
     slug = models.SlugField(unique=True, max_length=255)
 
     template = models.CharField(choices=TEMPLATE_CHOICES, max_length=255)
-    email_html = models.TextField()
-    web_html = models.TextField()
 
-    email_views = models.PositiveIntegerField(blank=True, default=0)
-    web_views = models.PositiveIntegerField(blank=True, default=0)
+    email_html = models.TextField(help_text=_('This is filled automatically.'))
+    web_html = models.TextField(help_text=_('This is filled automatically.'))
+
+    custom_email_html = models.TextField(blank=True, help_text=_(
+        'Custom HTML for the newsletter\'s email views. The template selected '
+        'should support this, for this to have any effect.'))
+    custom_web_html = models.TextField(blank=True, help_text=_(
+        'Custom HTML for the newsletter\'s web views. The template selected '
+        'should support this, for this to have any effect.'))
+
+    past_recipients = ArrayField(
+        models.IntegerField(blank=True, null=True), default=list)
+    email_impressions = ArrayField(
+        models.IntegerField(blank=True, null=True), default=list)
+    web_impressions = ArrayField(
+        models.IntegerField(blank=True, null=True), default=list)
 
     creation_date = models.DateTimeField(blank=True, null=True)
     update_date = models.DateTimeField(blank=True, null=True)
@@ -227,17 +253,7 @@ class Newsletter(models.Model):
             urlconf=stentor_conf.PUBLIC_URLCONF
         )
 
-    def increment_email_views(self, amount=None):
-        if not amount:
-            amount = 1
-        self.email_views += amount
-        self.save()
 
-    def increment_web_views(self, amount=None):
-        if not amount:
-            amount = 1
-        self.web_views += amount
-        self.save()
 
     def get_templates(self):
         return stentor_conf.TEMPLATES[self.template]
@@ -281,6 +297,59 @@ class Newsletter(models.Model):
                     distinct_subscribers.add(subscriber)
 
 
+    @cached_property
+    def total_past_recipients(self):
+        return len(self.past_recipients)
+    total_past_recipients.short_description = _('Past recipients')
+
+    @cached_property
+    def total_email_impressions(self):
+        return len(self.email_impressions)
+    total_email_impressions.short_description = _('Email impressions')
+
+    @cached_property
+    def total_web_impressions(self):
+        return len(self.web_impressions)
+    total_web_impressions.short_description = _('Web impressions')
+
+    @cached_property
+    def total_pending_sendings(self):
+        return self.scheduled_sendings.count()
+    total_pending_sendings.short_description = _('Pending sendings')
+
+    @cached_property
+    def total_impressions(self):
+        return chain(self.email_impressions, self.web_impressions)
+
+    @cached_property
+    def distinct_impressions(self):
+        return set(chain(self.email_impressions, self.web_impressions))
+
+    @cached_property
+    def impression_rate(self):
+        if not self.total_past_recipients:
+            return 0
+        return (self.total_impressions / self.total_past_recipients) * 100
+
+    # Accepts subscriber instances or subscriber pks
+    def add_impression(self, subscriber, impression_type):
+        if not issubclass(subscriber, Subscriber):
+            try:
+                subscriber = Subscriber.objects.get(pk=subscriber)
+            except Subscriber.DoesNotExist:
+                raise ValueError(
+                    'subscriber is neither a Subscriber instance nor a '
+                    'pk of an existing Subscriber')
+        if impression_type == 'email':
+            self.email_impressions.add(subscriber)
+        elif impression_type == 'web':
+            self.web_impressions.add(subscriber)
+        else:
+            raise ValueError(
+                'impression_type should be either "email" or "web"'
+            )
+
+
 @python_2_unicode_compatible
 class ScheduledSending(models.Model):
     """
@@ -312,7 +381,9 @@ class ScheduledSending(models.Model):
         Composes the message for the specific subscriber. Returns the message.
         """
         if force_render or not self.message:
-            mail_template = Template(self.newsletter.email_html)
+            mail_template = Template(
+                self.newsletter.email_html_first_phase_render
+            )
             context_vars = {
                 'newsletter': self.newsletter,
                 'subscriber': self.subscriber,
