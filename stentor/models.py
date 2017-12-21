@@ -13,6 +13,7 @@ from django.core.mail import EmailMessage
 from django.core.mail import send_mail
 from django.db import models
 from django.template import Template, Context
+from django.template.loader import get_template
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
@@ -253,16 +254,25 @@ class Newsletter(models.Model):
             urlconf=stentor_conf.PUBLIC_URLCONF
         )
 
-
-
-    def get_templates(self):
+    @cached_property
+    def html_template_paths(self):
         return stentor_conf.TEMPLATES[self.template]
 
-    def get_email_template(self):
-        return self.get_templates()[0]
+    @cached_property
+    def email_html_template_path(self):
+        return self.html_template_paths[0]
 
-    def get_web_template(self):
-        return self.get_templates()[1]
+    @cached_property
+    def web_html_template_path(self):
+        return self.html_template_paths[1]
+
+    @cached_property
+    def email_html_template(self):
+        return get_template(self.email_html_template_path)
+
+    @cached_property
+    def web_html_template(self):
+        return get_template(self.web_html_template_path)
 
     def get_mailing_lists(self):
         for mailing_list in self.mailing_lists.all():
@@ -296,6 +306,12 @@ class Newsletter(models.Model):
                     yield subscriber
                     distinct_subscribers.add(subscriber)
 
+    @cached_property
+    def email_html_first_phase_render(self):
+        context = Context({
+            'newsletter': self
+        })
+        return self.email_html_template.render(context)
 
     @cached_property
     def total_past_recipients(self):
