@@ -349,7 +349,7 @@ class Newsletter(models.Model):
 
     # Accepts subscriber instances or subscriber pks
     def add_impression(self, subscriber, impression_type):
-        if not issubclass(subscriber, Subscriber):
+        if not isinstance(subscriber, Subscriber):
             try:
                 subscriber = Subscriber.objects.get(pk=subscriber)
             except Subscriber.DoesNotExist:
@@ -357,9 +357,9 @@ class Newsletter(models.Model):
                     'subscriber is neither a Subscriber instance nor a '
                     'pk of an existing Subscriber')
         if impression_type == 'email':
-            self.email_impressions.add(subscriber)
+            self.email_impressions.append(subscriber)
         elif impression_type == 'web':
-            self.web_impressions.add(subscriber)
+            self.web_impressions.append(subscriber)
         else:
             raise ValueError(
                 'impression_type should be either "email" or "web"'
