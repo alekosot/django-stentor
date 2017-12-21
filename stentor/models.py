@@ -361,13 +361,14 @@ class Newsletter(models.Model):
                     'subscriber is neither a Subscriber instance nor a '
                     'pk of an existing Subscriber')
         if impression_type == 'email':
-            self.email_impressions.append(subscriber)
+            self.email_impressions.append(subscriber.pk)
         elif impression_type == 'web':
-            self.web_impressions.append(subscriber)
+            self.web_impressions.append(subscriber.pk)
         else:
             raise ValueError(
                 'impression_type should be either "email" or "web"'
             )
+        self.save()
 
 
 @python_2_unicode_compatible
