@@ -388,7 +388,6 @@ class ScheduledSending(models.Model):
                 'newsletter': self.newsletter,
                 'subscriber': self.subscriber,
                 'sending': self,
-                'is_anonymous_view': False
             }
             context = Context(context_vars)
             self.message = mail_template.render(context)

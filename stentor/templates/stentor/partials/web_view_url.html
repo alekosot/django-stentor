@@ -1,5 +1,5 @@
 {% spaceless %}
-  {% if is_anonymous_view %}
+  {% if not subscriber %}
     {{ newsletter.get_absolute_url }}
   {% else %}
     {% verbatim %}

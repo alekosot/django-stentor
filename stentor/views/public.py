@@ -125,12 +125,10 @@ class UnsubscribeView(AjaxTemplateMixin, SubscriptionHandlingMixin, FormView):
 
 def _newsletter_web_view(request, newsletter_slug, subscriber=None):
     newsletter = get_object_or_404(Newsletter, slug=newsletter_slug)
-    is_anonymous_view = False if subscriber else True
     newsletter.add_impression(subscriber, 'web')
     context_vars = {
         'newsletter': newsletter,
         'subscriber': subscriber,
-        'is_anonymous_view': is_anonymous_view
     }
     template = Template(newsletter.web_html)
     context = Context(context_vars)
