@@ -138,9 +138,6 @@ class Newsletter(models.Model):
 
     template = models.CharField(choices=TEMPLATE_CHOICES, max_length=255)
 
-    email_html = models.TextField(help_text=_('This is filled automatically.'))
-    web_html = models.TextField(help_text=_('This is filled automatically.'))
-
     custom_email_html = models.TextField(blank=True, help_text=_(
         'Custom HTML for the newsletter\'s email views. The template selected '
         'should support this, for this to have any effect.'))
@@ -234,7 +231,7 @@ class Newsletter(models.Model):
         for email in emails:
             send_mail(
                 subject,
-                self.email_html,  # TODO: This seems wrong
+                self.email_html,
                 stentor_conf.SENDER_VERBOSE,
                 (self.subscriber.get_email(),)
             )
@@ -307,11 +304,18 @@ class Newsletter(models.Model):
                     distinct_subscribers.add(subscriber)
 
     @cached_property
-    def email_html_first_phase_render(self):
+    def email_html(self):
         context = Context({
             'newsletter': self
         })
         return self.email_html_template.render(context)
+
+    @cached_property
+    def web_html(self):
+        context = Context({
+            'newsletter': self
+        })
+        return self.web_html_template.render(context)
 
     @cached_property
     def total_past_recipients(self):
@@ -398,7 +402,7 @@ class ScheduledSending(models.Model):
         """
         if force_render or not self.message:
             mail_template = Template(
-                self.newsletter.email_html_first_phase_render
+                self.newsletter.email_html
             )
             context_vars = {
                 'newsletter': self.newsletter,
