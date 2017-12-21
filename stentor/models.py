@@ -163,13 +163,6 @@ class Newsletter(models.Model):
     def __str__(self):
         return self.subject
 
-    def clean(self):
-        if self.pk and not self.mailing_lists.exists() \
-                and not self.subscribers.exists():
-            raise ValidationError(_(
-                'You must provide either at least one mailing list or at '
-                'least one subscriber to send this newsletter to.'))
-
     def save(self, *args, **kwargs):
         stentor_slugify = stentor_conf.SLUGIFY
         if stentor_slugify is not None:
@@ -208,6 +201,10 @@ class Newsletter(models.Model):
         Schedule the sending of this newsletter for the datetime ``when``.
         """
         self.clean()
+        if not (self.mailing_lists.exists() or self.subscribers.exists()):
+            raise ValidationError(_(
+                'You must provide either at least one mailing list or at '
+                'least one subscriber to send this newsletter to.'))
         return ScheduledSending.objects.bulk_create_for(
             newsletter=self,
             mailing_lists=mailing_lists,
