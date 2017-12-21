@@ -1,9 +1,7 @@
 {% spaceless %}
   {% if not subscriber %}
-    {{ newsletter.get_absolute_url }}
+    http://{{ stentor_domain }}{{ newsletter.get_absolute_url }}
   {% else %}
-    {% verbatim %}
-      {{ sending.get_web_view_url }}
-    {% endverbatim %}
+    http://{{ stentor_domain }}{{ sending.get_web_view_url }}
   {% endif %}
 {% endspaceless %}

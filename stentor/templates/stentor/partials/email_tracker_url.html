@@ -1,7 +1,5 @@
 {% spaceless %}
-  {% verbatim %}
-    {% if sending %}
-      {{ sending.get_email_tracker_url }}
-    {% endif %}
-  {% endverbatim %}
+  {% if sending %}
+    http://{{ stentor_domain }}{{ sending.get_email_tracker_url }}
+  {% endif %}
 {% endspaceless %}
