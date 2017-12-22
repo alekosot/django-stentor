@@ -43,6 +43,8 @@ Create the MailingLists that correspond to the names given in the ``STENTOR_DEFA
 Features
 --------
 
+* Python 2 / Python 3 compatible
+* Admin integration
 * Mailing lists
 * Subscribers registered on multiple mailing lists
 * HTML based emails
@@ -59,19 +61,20 @@ TODO
 
 * Documentation
 * Tests
-* Admin integration
+* Better admin integration
+* Multilingual newsletters
 * Plain text emails
 * Template backends
 * Hash generator backends
-* Tracker backends
+* Tracker backends (i.e. fetch data from a local or a remote app/service)
 * Restructure things so that Newsletter becomes a ``Proxy`` model to a more generic Message model. Basically, make this a mailling app and not strictly a newsletter one.
 * Add the ability to add content from other models in the newletter/message.
-* Multilingual newsletters
 * Newsletters with different authors/sender names and emails
 * Make all views class based so that their extension becomes easier.
 * Make models as extensible as possible, taking into account the possibility of model subclasses.
 
-*Constant efforts*
+**Constant efforts**
+
 * Simplicity, ideally this should be a plug-and-play app
 * Configuration/extensibility without sacrificing simplicity (if possible)
 * Documentation

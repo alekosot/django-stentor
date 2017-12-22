@@ -22,7 +22,6 @@ OBFUSCATION_SETTINGS = getattr(
     {}
 )
 
-# TODO: Rename to STENTOR_SLUGIFY
 # If set to None, no slugify will take place. If set to False,
 # django.utils.text.slugify will be used with the newsletter subject as input
 # and allow_unicode set to False. If set to True, the callable will be passed
@@ -76,7 +75,7 @@ else:
 SUBSCRIBE_FORM = getattr(
     settings,
     'STENTOR_SUBSCRIBE_FORM',
-    'stentor.forms.SubscribeForm'  # TODO
+    'stentor.forms.SubscribeForm'
 )
 
 TEMPLATES = getattr(
@@ -93,5 +92,5 @@ TEMPLATES = getattr(
 UNSUBSCRIBE_FORM = getattr(
     settings,
     'STENTOR_UNSUBSCRIBE_FORM',
-    'stentor.forms.UnsubscribeForm'  # TODO
+    'stentor.forms.UnsubscribeForm'
 )

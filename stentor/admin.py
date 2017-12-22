@@ -27,8 +27,6 @@ class NewsletterAdmin(admin.ModelAdmin):
             )
         }),
         ('Statistics', {
-            # TODO: Add description here, for further info about how to use
-            # this and what extra variables can be used
             'fields': (
                 'total_pending_sendings', 'total_past_recipients',
                 'total_email_impressions', 'total_web_impressions',
