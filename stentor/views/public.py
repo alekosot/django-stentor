@@ -138,7 +138,7 @@ def _newsletter_web_view(request, newsletter_slug, subscriber=None):
 
 def newsletter_web_view_from_subscriber(
         request, newsletter_slug, subscriber_hash):
-    subscriber_pk, __ = obfuscator.decode_web_view_hash(subscriber_hash)
+    __, subscriber_pk = obfuscator.decode_web_view_hash(subscriber_hash)
     subscriber = get_object_or_404(Subscriber, pk=subscriber_pk)
     return _newsletter_web_view(request, newsletter_slug, subscriber)
 
@@ -149,7 +149,7 @@ def newsletter_web_view_from_anonymous(request, newsletter_slug):
 
 def newsletter_email_tracker(request, newsletter_slug, subscriber_hash):
     newsletter = get_object_or_404(Newsletter, slug=newsletter_slug)
-    subscriber_pk, __ = obfuscator.decode_email_tracker_hash(subscriber_hash)
+    __, subscriber_pk = obfuscator.decode_email_tracker_hash(subscriber_hash)
     subscriber = get_object_or_404(Subscriber, pk=subscriber_pk)
     newsletter.add_impression(subscriber, 'email')
     return HttpResponse(TRANSPARENT_1_PIXEL_GIF, content_type="image/gif")
