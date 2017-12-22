@@ -31,7 +31,8 @@ class NewsletterAdmin(admin.ModelAdmin):
             # this and what extra variables can be used
             'fields': (
                 'total_pending_sendings', 'total_past_recipients',
-                'total_email_impressions', 'total_web_impressions', 'impression_rate'
+                'total_email_impressions', 'total_web_impressions',
+                'total_distinct_impressions', 'impression_rate_as_percentage'
             ),
         }),
         ('Custom HTML', {
@@ -43,13 +44,15 @@ class NewsletterAdmin(admin.ModelAdmin):
     )
     list_display = (
         'subject', 'slug', 'total_pending_sendings', 'total_past_recipients',
-        'total_email_impressions', 'total_web_impressions', 'impression_rate',
+        'total_email_impressions', 'total_web_impressions',
+        'total_distinct_impressions', 'impression_rate_as_percentage',
     )
     actions = ('schedule_sending',)
     prepopulated_fields = {'slug': ('subject', )}
     readonly_fields = (
         'total_pending_sendings', 'total_past_recipients',
-        'total_email_impressions', 'total_web_impressions', 'impression_rate'
+        'total_email_impressions', 'total_web_impressions',
+        'total_distinct_impressions', 'impression_rate_as_percentage'
     )
 
     def schedule_sending(self, request, queryset):

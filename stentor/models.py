@@ -346,10 +346,22 @@ class Newsletter(models.Model):
         return set(chain(self.email_impressions, self.web_impressions))
 
     @cached_property
+    def total_distinct_impressions(self):
+        return len(self.distinct_impressions)
+    total_distinct_impressions.short_description = _('Unique impressions')
+
+    @cached_property
     def impression_rate(self):
         if not self.total_past_recipients:
             return 0
-        return (self.total_impressions / self.total_past_recipients) * 100
+        return self.total_distinct_impressions / self.total_past_recipients
+
+    @cached_property
+    def impression_rate_as_percentage(self):
+        return str(self.impression_rate * 100) + '%'
+    impression_rate_as_percentage.short_description = _(
+        'Unique impression rate'
+    )
 
     # Accepts subscriber instances or subscriber pks
     def add_impression(self, subscriber, impression_type):
