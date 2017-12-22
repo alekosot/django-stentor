@@ -23,15 +23,21 @@ class HashIdsObfuscationBackend(BaseObfuscationBackend):
         return self.hashids.encode(ord_day_created, subscriber.pk)
 
     def encode_email_tracker_hash(self, sending):
-        return self.hashids.encode(sending.subscriber_id)
+        return self.hashids.encode(
+            sending.newsletter.pk, sending.subscriber.pk
+        )
 
     def encode_web_view_hash(self, sending):
-        return self.hashids.encode(sending.subscriber_id)
+        return self.hashids.encode(
+            sending.newsletter.pk,
+            sending.subscriber_id
+        )
 
     # Decoders
 
     def decode_unsubscribe_hash(self, hash_string):
-        return self.hashids.decode(hash_string)[0]
+        ord_day_created, subscriber_pk = self.hashids.decode(hash_string)
+        return str(ord_day_created), subscriber_pk
 
     def decode_email_tracker_hash(self, hash_string):
         return self.hashids.decode(hash_string)
