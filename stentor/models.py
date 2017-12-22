@@ -279,6 +279,9 @@ class Newsletter(models.Model):
         for subscriber in subscribers:
             yield subscriber
 
+    def get_recipients_remaining(self):
+        return self.subscribers.recipients_remaining_for(self)
+
     def get_all_subscribers(self, distinct=True, active_only=True):
         distinct_subscribers = set()
         for mailing_list in self.get_mailing_lists():

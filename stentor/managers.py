@@ -5,7 +5,7 @@ from itertools import chain
 
 from django.core import mail
 from django.db import models
-from django.utils import timezone
+from django.utils import timezone, six
 
 from . import settings as stentor_conf
 from . import checks as stentor_checks
@@ -36,6 +36,9 @@ class SubscriberQuerySet(models.QuerySet):
     def active(self):
         return self.exclude(is_active=False)
 
+    def recipients_remaining_for(self, newsletter):
+        return self.exclude(pk__in=newsletter.past_recipients)
+
 
 class SubscriberManager(models.Manager):
     def get_queryset(self):
@@ -44,15 +47,40 @@ class SubscriberManager(models.Manager):
     def active(self):
         return self.get_queryset().active()
 
+    def recipients_remaining_for(self, newsletter):
+        return self.get_queryset().recipients_remaining_for(newsletter)
+
 
 class ScheduledSendingQuerySet(models.QuerySet):
     def send(self):
+        from stentor.models import Newsletter
+
         messages = []
+        newsletter_map = {}
+
         for scheduled_sending in self:
+            newsletter_slug = scheduled_sending.newsletter.slug
+            subscriber_pk = scheduled_sending.subscriber.pk
+            if newsletter_slug not in newsletter_map:
+                newsletter_map[newsletter_slug] = []
+            newsletter_map[newsletter_slug].append(subscriber_pk)
+
             messages.append(scheduled_sending.get_email_message())
 
         connection = mail.get_connection()
         connection.send_messages(messages)
+
+        newsletter_slugs = list(six.iterkeys(newsletter_map))
+        newsletters = Newsletter.objects.filter(slug__in=newsletter_slugs)[:]
+
+        # HACK/TODO: This is ugly...
+        for newsletter_slug, subscriber_pks in six.iteritems(newsletter_map):
+            newsletter = [
+                nl for nl in newsletters if nl.slug == newsletter_slug
+            ][0]
+
+            newsletter.past_recipients += subscriber_pks
+            newsletter.save()
 
     def send_and_delete(self):
         self.send()
@@ -85,13 +113,13 @@ class ScheduledSendingManager(models.Manager):
         if not mailing_lists:
             mailing_lists = newsletter.mailing_lists.all()
         if not subscribers:
-            subscribers = newsletter.subscribers.all()
+            subscribers = newsletter.get_recipients_remaining()
         if not when:
             when = timezone.now()
 
         mlist_subscribers = Subscriber.objects.filter(
             mailing_lists__in=mailing_lists
-        )
+        ).recipients_remaining_for(newsletter)
 
         # We join the two iterables into one and we discard duplicates by
         # making the iterable a set.
