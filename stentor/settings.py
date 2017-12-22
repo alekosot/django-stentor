@@ -12,13 +12,13 @@ DEFAULT_MAILING_LISTS = getattr(
 
 OBFUSCATION_BACKEND = getattr(
     settings,
-    'STENTOR_OBFUSCATION',
+    'STENTOR_OBFUSCATION_BACKEND',
     'stentor.obfuscation.dummy.backend'
 )
 
 OBFUSCATION_SETTINGS = getattr(
     settings,
-    'OBFUSCATION_SETTINGS',
+    'STENTOR_OBFUSCATION_SETTINGS',
     {}
 )
 
