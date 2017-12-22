@@ -37,7 +37,7 @@ Add ``'stentor'`` in your INSTALLED_APPS:
     #...
   )
 
-Create the MailingLists that correspond to the names given in the ``STENTOR_DEFAULT_MAILING_LISTS`` setting (``['default']`` by default).
+Create the MailingLists that correspond to the names given in the ``STENTOR_DEFAULT_MAILING_LISTS`` setting (``['Website subscribers']`` by default).
 
 
 Features
@@ -49,7 +49,7 @@ Features
 * Scheduled sending of newsletters (send in the future)
 * Newsletter templates
 * Newsletters that can be viewed on the browser (aka web views)
-* Tracking of email and web "impressions" of sent newsletters (currently buggy)
+* Tracking of email and web "impressions" of sent newsletters
 * Obfuscation backends for publicly visible database values
 * Many settings and hooks for tweaking the behavior of the app, with reasonable defaults, so that you don't get lost in configuration.
 
