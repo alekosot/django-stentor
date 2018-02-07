@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django import forms
 from django.contrib import admin
+
+from . import settings as stentor_conf
 from .models import MailingList, Subscriber, Newsletter, ScheduledSending
+from .utils import TEMPLATE_CHOICES
 
 
 @admin.register(MailingList)
@@ -59,6 +63,11 @@ class NewsletterAdmin(admin.ModelAdmin):
     schedule_sending.short_description = (
         'Schedule the selected newsletters for sending (as soon as possible)'
     )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'template':
+            return forms.ChoiceField(choices=TEMPLATE_CHOICES)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
 @admin.register(ScheduledSending)

@@ -24,6 +24,7 @@ from django.utils.translation import ugettext as _
 from . import settings as stentor_conf
 from . import managers as stentor_managers
 from .utils import obfuscator, subscribe as subscribe_util
+from .validators import validate_template_choice
 
 
 @python_2_unicode_compatible
@@ -119,8 +120,6 @@ class Newsletter(models.Model):
     """
     Representation of a newsletter.
     """
-    TEMPLATE_CHOICES = tuple((name, name) for name in stentor_conf.TEMPLATES)
-
     subject = models.CharField(max_length=255)
     mailing_lists = models.ManyToManyField(
         MailingList, blank=True, help_text=_(
@@ -136,7 +135,10 @@ class Newsletter(models.Model):
             'the newletter will still be sent only once to them.'))
     slug = models.SlugField(unique=True, max_length=255)
 
-    template = models.CharField(choices=TEMPLATE_CHOICES, max_length=255)
+    # NOTE: This is a CharField, but in a Form it should be a ChoiceField with
+    # with choices built from ``STENTOR_TEMPLATES``. In stentor.utils there is
+    # the ``TEMPLATE_CHOICES`` var that can be used for this purpose.
+    template = models.CharField(max_length=255)
 
     custom_email_html = models.TextField(blank=True, help_text=_(
         'Custom HTML for the newsletter\'s email views. The template selected '

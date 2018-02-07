@@ -7,6 +7,8 @@ from django.utils.module_loading import import_string
 
 obfuscator = import_string(stentor_conf.OBFUSCATION_BACKEND)
 
+TEMPLATE_CHOICES = tuple((name, name) for name in stentor_conf.TEMPLATES)
+
 
 # TODO: Add test
 def subscribe(email, add_to_default=True, mailing_lists=None, subscriber=None):
