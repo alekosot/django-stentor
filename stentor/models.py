@@ -363,7 +363,7 @@ class Newsletter(models.Model):
 
     @cached_property
     def total_impressions(self):
-        return chain(self.email_impressions, self.web_impressions)
+        return len(list(chain(self.email_impressions, self.web_impressions)))
 
     @cached_property
     def distinct_impressions(self):
@@ -388,14 +388,16 @@ class Newsletter(models.Model):
 
     @cached_property
     def impression_rate_as_percentage(self):
-        return str(self.impression_rate * 100) + '%'
+        percentage = self.impression_rate * 100
+        return '{0:.2f}'.format(percentage) + '%'
     impression_rate_as_percentage.short_description = _(
         'Impression rate'
     )
 
     @cached_property
     def distinct_impression_rate_as_percentage(self):
-        return str(self.distinct_impression_rate * 100) + '%'
+        percentage = self.distinct_impression_rate * 100
+        return '{0:.2f}'.format(percentage) + '%'
     distinct_impression_rate_as_percentage.short_description = _(
         'Unique impression rate'
     )
