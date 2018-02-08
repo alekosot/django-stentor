@@ -18,6 +18,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.functional import cached_property
+from django.utils.module_loading import import_string
 from django.utils.text import slugify
 from django.utils.translation import ugettext as _
 
@@ -307,16 +308,26 @@ class Newsletter(models.Model):
 
     @cached_property
     def email_html(self):
-        context = Context({
+        context_dict = {
             'newsletter': self
-        })
+        }
+        if stentor_conf.CONTEXT_HANDLERS:
+            for handler_path in stentor_conf.CONTEXT_HANDLERS:
+                handler = import_string(handler_path)
+                context_dict.update(handler(context_dict, render='email_html'))
+        context = Context(context_dict)
         return self.email_html_template.render(context)
 
     @cached_property
     def web_html(self):
-        context = Context({
+        context_dict = {
             'newsletter': self
-        })
+        }
+        if stentor_conf.CONTEXT_HANDLERS:
+            for handler_path in stentor_conf.CONTEXT_HANDLERS:
+                handler = import_string(handler_path)
+                context_dict.update(handler(context_dict, render='web_html'))
+        context = Context(context_dict)
         return self.web_html_template.render(context)
 
     @cached_property

@@ -4,6 +4,18 @@ from __future__ import unicode_literals
 from django.conf import settings
 
 
+# A list of callables that modify the context of a Newsletter's renders. These
+# handlers take a dictionary as the first argument (the "base" context of the
+# render) and a string argument that signifies the nature of the render
+# ('email_html' and 'web_html' for the moment). They should all return a
+# dictionary (empty or not).
+CONTEXT_HANDLERS = getattr(
+    settings,
+    'STENTOR_CONTEXT_HANDLERS',
+    ['']
+)
+
+
 DEFAULT_MAILING_LISTS = getattr(
     settings,
     'STENTOR_DEFAULT_MAILING_LISTS',

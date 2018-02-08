@@ -2,6 +2,6 @@
 
 __author__ = """Alex Sotiriou"""
 __email__ = 'a.sotiriou@difio.gr'
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 
 default_app_config = 'stentor.apps.StentorConfig'
