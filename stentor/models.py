@@ -45,7 +45,7 @@ class MailingList(models.Model):
         return self.name
 
     def get_subscriber_emails(self):
-        for subscriber in self.subscribers.all():
+        for subscriber in self.subscribers.active():
             yield subscriber.get_email()
 
 
@@ -221,19 +221,28 @@ class Newsletter(models.Model):
         NOTE: This may be slow for large amount of emails. Avoid it and use
         only for testing.
         """
+        if not mailing_lists and not subscribers:
+            raise ValueError(_(
+                'You have to supply a mailing_lists or a subscribers '
+                'argument to test_send_now'))
+
         if not subject:
             subject = self.subject
 
         emails = []
-        emails += [sub.email for sub in mailing_lists.subscribers.active()]
-        emails += [sub.email for sub in subscribers if sub.is_active()]
+        if mailing_lists:
+            emails += [email for mailing_list in mailing_lists
+                       for email in mailing_list.get_subscriber_emails()]
+        if subscribers:
+            emails += [sub.email for sub in subscribers if sub.is_active()]
 
         for email in emails:
             send_mail(
                 subject,
-                self.email_html,
+                '',
                 stentor_conf.SENDER_VERBOSE,
-                (self.subscriber.get_email(),)
+                (email,),
+                html_message=self.email_html
             )
 
     def send_now(self, mailing_lists=None, subscribers=None):
