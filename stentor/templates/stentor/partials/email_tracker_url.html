@@ -1,5 +1,5 @@
 {% spaceless %}
   {% if sending %}
-    http://{{ stentor_domain }}{{ sending.get_email_tracker_url }}
+    {{ public_site_url }}{{ sending.get_email_tracker_url }}
   {% endif %}
 {% endspaceless %}

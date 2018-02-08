@@ -44,6 +44,16 @@ SLUGIFY = getattr(
     False
 )
 
+# The "base" URL that will serve the tracking image of newsletters, their web
+# views and the unsubscription of Subscribers.
+# NOTE: If this is not set, stentor tries to get the url from the current Site,
+# as given by the django.contrib.sites app.
+PUBLIC_SITE_URL = getattr(
+    settings,
+    STENTOR_PUBLIC_SITE_URL,
+    ''
+)
+
 # This is used in cases where the "admin/cms site", where the creation of
 # newsletters takes place, is different than the "public site" where web
 # views of newsletters take place.
