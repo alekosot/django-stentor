@@ -50,7 +50,7 @@ SLUGIFY = getattr(
 # as given by the django.contrib.sites app.
 PUBLIC_SITE_URL = getattr(
     settings,
-    STENTOR_PUBLIC_SITE_URL,
+    'STENTOR_PUBLIC_SITE_URL',
     ''
 )
 
