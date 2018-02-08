@@ -345,6 +345,13 @@ class Newsletter(models.Model):
     total_past_recipients.short_description = _('Past recipients')
 
     @cached_property
+    def total_pending_sendings(self):
+        return self.scheduled_sendings.count()
+    total_pending_sendings.short_description = _('Pending sendings')
+
+    # Impressions
+
+    @cached_property
     def total_email_impressions(self):
         return len(self.email_impressions)
     total_email_impressions.short_description = _('Email impressions')
@@ -353,11 +360,6 @@ class Newsletter(models.Model):
     def total_web_impressions(self):
         return len(self.web_impressions)
     total_web_impressions.short_description = _('Web impressions')
-
-    @cached_property
-    def total_pending_sendings(self):
-        return self.scheduled_sendings.count()
-    total_pending_sendings.short_description = _('Pending sendings')
 
     @cached_property
     def total_impressions(self):
@@ -376,12 +378,25 @@ class Newsletter(models.Model):
     def impression_rate(self):
         if not self.total_past_recipients:
             return 0
+        return self.total_impressions / self.total_past_recipients
+
+    @cached_property
+    def distinct_impression_rate(self):
+        if not self.total_past_recipients:
+            return 0
         return self.total_distinct_impressions / self.total_past_recipients
 
     @cached_property
     def impression_rate_as_percentage(self):
         return str(self.impression_rate * 100) + '%'
     impression_rate_as_percentage.short_description = _(
+        'Impression rate'
+    )
+
+    @cached_property
+    def distinct_impression_rate_as_percentage(self):
+        return str(self.distinct_impression_rate * 100) + '%'
+    distinct_impression_rate_as_percentage.short_description = _(
         'Unique impression rate'
     )
 
