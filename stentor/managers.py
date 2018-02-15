@@ -39,6 +39,15 @@ class SubscriberQuerySet(models.QuerySet):
     def recipients_remaining_for(self, newsletter):
         return self.exclude(pk__in=newsletter.past_recipients)
 
+    def schedulable_for(self, newsletter):
+        from stentor.models import ScheduledSending
+        scheduled_subscribers = ScheduledSending.objects  \
+            .filter(newsletter=newsletter)  \
+            .values_list('subscriber', flat=True)
+        return self \
+            .recipients_remaining_for(newsletter) \
+            .exclude(pk__in=scheduled_subscribers)
+
 
 class SubscriberManager(models.Manager):
     def get_queryset(self):
@@ -49,6 +58,9 @@ class SubscriberManager(models.Manager):
 
     def recipients_remaining_for(self, newsletter):
         return self.get_queryset().recipients_remaining_for(newsletter)
+
+    def schedulable_for(self, newsletter):
+        return self.get_queryset().schedulable_for(newsletter)
 
 
 class ScheduledSendingQuerySet(models.QuerySet):
@@ -113,13 +125,13 @@ class ScheduledSendingManager(models.Manager):
         if not mailing_lists:
             mailing_lists = newsletter.mailing_lists.all()
         if not subscribers:
-            subscribers = newsletter.get_recipients_remaining()
+            subscribers = newsletter.schedulable_subscribers()
         if not when:
             when = timezone.now()
 
         mlist_subscribers = Subscriber.objects.filter(
             mailing_lists__in=mailing_lists
-        ).recipients_remaining_for(newsletter)
+        ).schedulable_for(newsletter)
 
         # We join the two iterables into one and we discard duplicates by
         # making the iterable a set.
