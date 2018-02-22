@@ -12,7 +12,7 @@ from django.conf import settings
 CONTEXT_HANDLERS = getattr(
     settings,
     'STENTOR_CONTEXT_HANDLERS',
-    ['']
+    []
 )
 
 
