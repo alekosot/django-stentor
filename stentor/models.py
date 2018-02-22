@@ -320,26 +320,24 @@ class Newsletter(models.Model):
 
     @cached_property
     def email_html(self):
-        context_dict = {
+        context = {
             'newsletter': self
         }
         if stentor_conf.CONTEXT_HANDLERS:
             for handler_path in stentor_conf.CONTEXT_HANDLERS:
                 handler = import_string(handler_path)
-                context_dict.update(handler(context_dict, render='email_html'))
-        context = Context(context_dict)
+                context.update(handler(context, render='email_html'))
         return self.email_html_template.render(context)
 
     @cached_property
     def web_html(self):
-        context_dict = {
+        context = {
             'newsletter': self
         }
         if stentor_conf.CONTEXT_HANDLERS:
             for handler_path in stentor_conf.CONTEXT_HANDLERS:
                 handler = import_string(handler_path)
-                context_dict.update(handler(context_dict, render='web_html'))
-        context = Context(context_dict)
+                context.update(handler(context, render='web_html'))
         return self.web_html_template.render(context)
 
     @cached_property

@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django import template
 from django.template.loader import render_to_string
+from django.utils import six
 
 from stentor import settings as stentor_conf
 
@@ -29,7 +30,9 @@ register = template.Library()
 def web_view_url(context):
     if 'public_site_url' not in context:
         context['public_site_url'] = public_site_url
-    html = render_to_string('stentor/partials/web_view_url.html', context)
+    ctx_dict = context.dicts[1]
+    ctx = {key: value for key, value in six.iteritems(ctx_dict)}
+    html = render_to_string('stentor/partials/web_view_url.html', ctx)
     return html.strip()
 
 
@@ -40,7 +43,9 @@ def web_view_url(context):
 def email_tracker_url(context):
     if 'public_site_url' not in context:
         context['public_site_url'] = public_site_url
-    html = render_to_string('stentor/partials/email_tracker_url.html', context)
+    ctx_dict = context.dicts[1]
+    ctx = {key: value for key, value in six.iteritems(ctx_dict)}
+    html = render_to_string('stentor/partials/email_tracker_url.html', ctx)
     return html.strip()
 
 
@@ -48,5 +53,7 @@ def email_tracker_url(context):
 def unsubscribe_url(context):
     if 'public_site_url' not in context:
         context['public_site_url'] = public_site_url
-    html = render_to_string('stentor/partials/unsubscribe_url.html', context)
+    ctx_dict = context.dicts[1]
+    ctx = {key: value for key, value in six.iteritems(ctx_dict)}
+    html = render_to_string('stentor/partials/unsubscribe_url.html', ctx)
     return html.strip()
