@@ -467,16 +467,22 @@ class ScheduledSending(models.Model):
         return self.message
 
     def get_common_email_data(self):
-        return [
+        args = [
             self.newsletter.subject,
             self.get_finalized_message(),
             stentor_conf.SENDER_VERBOSE,
             (self.subscriber.get_email(),)
         ]
+        kwargs = {}
+        if stentor_conf.REPLY_TO:
+            kwargs['reply_to'] = stentor_conf.REPLY_TO
+        if stentor_conf.EXTRA_HEADERS:
+            kwargs['headers'] = stentor_conf.EXTRA_HEADERS
+        return args, kwargs
 
     def get_email_message(self):
-        attrs = self.get_common_email_data()
-        email_message = EmailMessage(*attrs)
+        attrs, kwargs = self.get_common_email_data()
+        email_message = EmailMessage(*attrs, **kwargs)
         # Change the subtype to HTML, the common case for newsletters
         email_message.content_subtype = 'html'
         return email_message

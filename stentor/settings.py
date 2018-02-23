@@ -15,11 +15,16 @@ CONTEXT_HANDLERS = getattr(
     []
 )
 
-
 DEFAULT_MAILING_LISTS = getattr(
     settings,
     'STENTOR_DEFAULT_MAILING_LISTS',
     ['Website subscribers']
+)
+
+EXTRA_HEADERS = getattr(
+    settings,
+    'STENTOR_EXTRA_HEADERS',
+    {}
 )
 
 OBFUSCATION_BACKEND = getattr(
@@ -68,7 +73,7 @@ PUBLIC_URLCONF = getattr(
 REPLY_TO = getattr(
     settings,
     'STENTOR_REPLY_TO',
-    (settings.DEFAULT_FROM_EMAIL,)
+    ()
 )
 
 SENDER_EMAIL = getattr(
