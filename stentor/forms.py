@@ -1,12 +1,54 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import re
 
 from django import forms
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from stentor.utils import obfuscator, subscribe
 
-from .models import Subscriber, Newsletter
+from .models import Subscriber, MailingList
+
+
+class MultiEmailField(forms.Field):
+    def to_python(self, value):
+        """
+        Normalize data to a list of strings.
+        """
+        if not value:
+            return []
+
+        email_list = [
+            email.strip('@,')
+            for email in re.split(r';|,\s|\s+|\n|\r', value)
+            if email
+        ]
+        return list(set(email_list))
+
+    def validate(self, value):
+        """
+        Check if value consists only of valid emails.
+        """
+        super().validate(value)
+        try:
+            [validate_email(email) for email in value]
+        except:
+            raise forms.ValidationError(_(
+                'Some of the emails you entered are invalid.'
+            ))
+
+
+class MultipleSubscribersForm(forms.Form):
+    """
+    A form with a custom field for inserting multiple emails into subscribers
+    and it is used from the newsletter's actions intermediate page.
+    """
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    emails = MultiEmailField(
+        widget=forms.Textarea(attrs={'rows': 20, 'cols': 40})
+    )
 
 
 class SubscribeForm(forms.Form):
