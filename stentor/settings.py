@@ -39,10 +39,12 @@ OBFUSCATION_SETTINGS = getattr(
     {}
 )
 
-# If set to None, no slugify will take place. If set to False,
-# django.utils.text.slugify will be used with the newsletter subject as input
-# and allow_unicode set to False. If set to True, the callable will be passed
-# the Newsletter instance, so account for it.
+# STENTOR_SLUGIFY has the following possible values:
+#   - If set to None, no slugify will take place.
+#   - If "falsy", but not None, django.utils.text.slugify will be used with
+#     the newsletter subject as input and allow_unicode set to False.
+#   - If it's "truthy", the value will be assumed to be a callable and it will
+#     be passed the Newsletter instance, so account for it.
 SLUGIFY = getattr(
     settings,
     'STENTOR_SLUGIFY',
