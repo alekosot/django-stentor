@@ -7,10 +7,19 @@ from stentor import settings as stentor_conf
 
 
 class BaseObfuscationBackend(object):
+    """
+    Base object for describing the API for obfuscating publicly visible values.
+
+    This is used for:
+    - in unsubscription URLs for a specific Subscriber
+    - in unsubscription URLs for a Subscriber-Newsletter pair
+    - in web view URLs of Newsletters
+    - tracker image URLs that are used for tracking email views
+    """
 
     def __init__(self):
-        self.validate_settings()
-        for key, value in six.iteritems(stentor_conf.OBFUSCATION_SETTINGS):
+        settings = self.validate_settings()
+        for key, value in six.iteritems(settings):
             setattr(self, key, value)
 
     def validate_settings(self):
@@ -18,7 +27,7 @@ class BaseObfuscationBackend(object):
         Subclasses should make their own checks on their configuration and
         raise an ``ImproperlyConfigured`` exception if they are invalid.
         """
-        pass
+        return stentor_conf.OBFUSCATION_SETTINGS
 
     # Encoders
 

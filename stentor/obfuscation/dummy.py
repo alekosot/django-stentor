@@ -7,11 +7,6 @@ from stentor.obfuscation.base import BaseObfuscationBackend
 class DummyObfuscationBackend(BaseObfuscationBackend):
     """
     A dummy obfuscation backend that does **NO** actual obfuscation.
-
-    By using this, your Subscribers' database primary keys **will be visible**
-    in Subscriber unsubscription urls, in the urls for viewing newsletters via
-    the browser and the url of the tracker image that is used in the email
-    content.
     """
     # Encoders
 

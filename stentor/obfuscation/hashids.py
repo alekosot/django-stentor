@@ -7,13 +7,17 @@ from stentor import settings as stentor_conf
 from stentor.obfuscation.base import BaseObfuscationBackend
 
 
+# TODO: Add a check for this backend so that if there is no 'salt' in settings,
+# the user is notified that the obfuscated values will be easily decodable
 class HashIdsObfuscationBackend(BaseObfuscationBackend):
     def __init__(self):
         super(HashIdsObfuscationBackend, self).__init__()
         available_settings = ['salt', 'min_length', 'alphabet']
         dikt = {}
         for setting in available_settings:
-            dikt[setting] = stentor_conf.OBFUSCATION_SETTINGS[setting]
+            conf = getattr(stentor_conf.OBFUSCATION_SETTINGS, setting, None)
+            if conf:
+                dikt[setting] = conf
         self.hashids = hashids.Hashids(**dikt)
 
     # Encoders
