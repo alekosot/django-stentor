@@ -252,7 +252,7 @@ class Newsletter(models.Model):
     def get_email_tracker_url(self, sending):
         subscriber_hash = obfuscator.encode_email_tracker_hash(sending)
         return reverse_lazy(
-            'stentor:newsletter.email_view_tracker',
+            'stentor:newsletter.email_view_tracker_from_subscriber',
             kwargs={
                 'newsletter_slug': self.slug,
                 'subscriber_hash': subscriber_hash

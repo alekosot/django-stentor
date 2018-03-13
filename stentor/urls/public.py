@@ -34,9 +34,12 @@ urlpatterns = [
         public.newsletter_email_tracker,
         name='newsletter.email_view_tracker'),
 
-    url(r'^!/(?P<newsletter_slug>[\w\d_-]+)/(?P<subscriber_hash>[\S^/]+)/image.gif$',  # NOQA
+    url(r'^!/'
+            r'(?P<newsletter_slug>[\w\d_-]+)/'  # NOQA
+            r'(?P<subscriber_hash>[\S^/]+)/'  # NOQA
+            r'image.gif$',  # NOQA
         public.newsletter_email_tracker,
-        name='newsletter.email_view_tracker'),
+        name='newsletter.email_view_tracker_from_subscriber'),
 
     url(r'^(?P<newsletter_slug>[\w\d_-]+)/$',
         public.newsletter_web_view_from_anonymous,
