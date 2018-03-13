@@ -422,6 +422,18 @@ class Newsletter(models.Model):
             )
         self.save()
 
+    def clear_statistics(self):
+        """
+        Remove all statistics for this newsletter.
+
+        This is useful for the cases of test sendings and development.
+        """
+        self.past_recipients = []
+        self.email_impressions = []
+        self.web_impressions = []
+        self.cancelled_subscriptions = []
+        self.save()
+
 
 @python_2_unicode_compatible
 class ScheduledSending(models.Model):
