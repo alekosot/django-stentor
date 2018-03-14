@@ -23,7 +23,7 @@ urlpatterns = [
         public.SubscribeSuccessView.as_view(),
         name='subscriber.subscribe_success'),
 
-    url(r'^unsubscribe/(?P<unsubscribe_hash>[\S^/]+)/$',
+    url(r'^unsubscribe/(?P<unsubscribe_hash>[^/]\S+)/$',
         public.UnsubscribeView.as_view(),
         name='subscriber.unsubscribe'),
     url(r'^unsubscribe/successful$',
@@ -36,7 +36,7 @@ urlpatterns = [
 
     url(r'^!/'
             r'(?P<newsletter_slug>[\w\d_-]+)/'  # NOQA
-            r'(?P<subscriber_hash>[\S^/]+)/'  # NOQA
+            r'(?P<subscriber_hash>[^/]\S+)/'  # NOQA
             r'image.gif$',  # NOQA
         public.newsletter_email_tracker,
         name='newsletter.email_view_tracker_from_subscriber'),
@@ -45,7 +45,7 @@ urlpatterns = [
         public.newsletter_web_view_from_anonymous,
         name='newsletter.anonymous_web_view'),
 
-    url(r'^(?P<newsletter_slug>[\w\d_-]+)/(?P<subscriber_hash>[\S^/]+)/$',
+    url(r'^(?P<newsletter_slug>[\w\d_-]+)/(?P<subscriber_hash>[^/]\S+)/$',
         public.newsletter_web_view_from_subscriber,
         name='newsletter.subscriber_web_view'),
 ]
