@@ -34,7 +34,9 @@ class NewsletterAdmin(admin.ModelAdmin):
             'fields': (
                 'total_pending_sendings', 'total_past_recipients',
                 'total_email_impressions', 'total_web_impressions',
-                'total_distinct_impressions', 'impression_rate_as_percentage'
+                'total_distinct_impressions', 'impression_rate_as_percentage',
+                'total_distinct_unsubscriptions',
+                'distinct_unsubscription_rate_as_percentage'
             ),
         }),
         ('Custom HTML', {
@@ -48,13 +50,17 @@ class NewsletterAdmin(admin.ModelAdmin):
         'subject', 'slug', 'total_pending_sendings', 'total_past_recipients',
         'total_email_impressions', 'total_web_impressions',
         'total_distinct_impressions', 'impression_rate_as_percentage',
+        'total_distinct_unsubscriptions',
+        'distinct_unsubscription_rate_as_percentage'
     )
     actions = ('schedule_sending',)
     prepopulated_fields = {'slug': ('subject', )}
     readonly_fields = (
         'total_pending_sendings', 'total_past_recipients',
         'total_email_impressions', 'total_web_impressions',
-        'total_distinct_impressions', 'impression_rate_as_percentage'
+        'total_distinct_impressions', 'impression_rate_as_percentage',
+        'total_distinct_unsubscriptions',
+        'distinct_unsubscription_rate_as_percentage'
     )
 
     def schedule_sending(self, request, queryset):

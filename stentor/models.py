@@ -154,6 +154,10 @@ class Newsletter(models.Model):
         models.IntegerField(blank=True, null=True), default=list)
     web_impressions = ArrayField(
         models.IntegerField(blank=True, null=True), default=list)
+    unsubscriptions = ArrayField(
+        models.IntegerField(blank=True, null=True), default=list, help_text=_(
+            "The subscriptions that were cancelled through this newsletter's "
+            '"unsubscribe" link.'))
 
     creation_date = models.DateTimeField(blank=True, null=True)
     update_date = models.DateTimeField(blank=True, null=True)
@@ -422,6 +426,71 @@ class Newsletter(models.Model):
             )
         self.save()
 
+    # Cancelled Subscriptions
+
+    @cached_property
+    def total_unsubscriptions(self):
+        return len(self.unsubscriptions)
+
+    @cached_property
+    def distinct_unsubscriptions(self):
+        return set(self.unsubscriptions)
+
+    @cached_property
+    def total_distinct_unsubscriptions(self):
+        return len(self.distinct_unsubscriptions)
+    total_distinct_unsubscriptions.short_description = _('Unsubscribed')
+
+    @cached_property
+    def unsubscription_rate(self):
+        if not self.total_past_recipients:
+            return 0
+        return self.total_unsubscriptions / self.total_past_recipients
+
+    @cached_property
+    def distinct_unsubscription_rate(self):
+        if not self.total_past_recipients:
+            return 0
+        return self.total_distinct_unsubscriptions / self.total_past_recipients
+
+    @cached_property
+    def unsubscription_rate_as_percentage(self):
+        percentage = self.impression_rate * 100
+        return '{0:.2f}'.format(percentage) + '%'
+
+    @cached_property
+    def distinct_unsubscription_rate_as_percentage(self):
+        percentage = self.distinct_unsubscription_rate * 100
+        return '{0:.2f}'.format(percentage) + '%'
+    # NOTE: Since multiple "unsubscriptions" of a Subscriber for the same
+    # Newsletter are  confusing for the end users  the "short_description"
+    # that is used in the admin does not include the word "Unique", even
+    # though it should, technically speaking. Don't be misled by this.
+    distinct_unsubscription_rate_as_percentage.short_description = _(
+        'Unsubscribed rate'
+    )
+
+    def unsubscribe_recipient(self, subscriber):
+        if isinstance(subscriber, Subscriber):
+            subscriber_pk = subscriber.pk
+        else:
+            subscriber_pk = subscriber
+            try:
+                subscriber = Subscriber.objects.get(pk=subcriber_pk)
+            except Subscriber.DoesNotExist:
+                raise ValueError(_(
+                    'There is no Subscriber with pk equal to {}'
+                    .format(abssubscriber_pk)
+                ))
+        if subscriber_pk not in self.past_recipients:
+            raise ValueError(
+                'The newsletter "{}" has not been sent to the Subscriber '
+                'with primary key {}'.format(self, subscriber_pk)
+            )
+        subscriber.unsubscribe()
+        self.unsubscriptions.append(subscriber_pk)
+        self.save()
+
     def clear_statistics(self):
         """
         Remove all statistics for this newsletter.
@@ -431,7 +500,7 @@ class Newsletter(models.Model):
         self.past_recipients = []
         self.email_impressions = []
         self.web_impressions = []
-        self.cancelled_subscriptions = []
+        self.unsubscriptions = []
         self.save()
 
 
@@ -518,3 +587,7 @@ class ScheduledSending(models.Model):
 
     def get_email_tracker_url(self):
         return self.newsletter.get_email_tracker_url(self)
+
+    def get_unsubscribe_url(self):
+        hash_string = obfuscator.encode_single_value(self.newsletter_id)
+        return self.subscriber.get_unsubscribe_url() + hash_string + '/'

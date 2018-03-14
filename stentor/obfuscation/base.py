@@ -31,6 +31,9 @@ class BaseObfuscationBackend(object):
 
     # Encoders
 
+    def encode_single_value(self, int):
+        raise NotImplementedError('Subclasses must implement this')
+
     def encode_unsubscribe_hash(self, subscriber):
         """
         This must take into account the creation date of the Subscriber.
@@ -44,6 +47,12 @@ class BaseObfuscationBackend(object):
         raise NotImplementedError('Subclasses must implement this')
 
     # Decoders
+
+    def decode_single_value_hash(self, hash_string):
+        """
+        Return a single integer from the hash.
+        """
+        raise NotImplementedError('Subclasses must implement this')
 
     def decode_unsubscribe_hash(self, hash_string):
         """

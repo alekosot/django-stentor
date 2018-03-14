@@ -109,6 +109,11 @@ class UnsubscribeView(AjaxTemplateMixin, SubscriptionHandlingMixin, FormView):
         subscriber = get_object_or_404(Subscriber, pk=subscriber_pk)
         if ord_day_created != str(subscriber.creation_date.toordinal()):
             raise Http404()
+        if 'newsletter_hash' in self.kwargs:
+            newsletter_pk = obfuscator.decode_single_value_hash(
+                self.kwargs['newsletter_hash']
+            )[0]
+            get_object_or_404(Newsletter, pk=newsletter_pk)
         return out
 
     def get_context_data(self, **kwargs):
@@ -120,6 +125,8 @@ class UnsubscribeView(AjaxTemplateMixin, SubscriptionHandlingMixin, FormView):
         initial = {
             'unsubscribe_hash': self.kwargs['unsubscribe_hash']
         }
+        if 'newsletter_hash' in self.kwargs:
+            initial['newsletter_hash'] = self.kwargs['newsletter_hash']
         return initial
 
 

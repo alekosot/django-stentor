@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from stentor.utils import obfuscator, subscribe
 
-from .models import Subscriber
+from .models import Subscriber, Newsletter
 
 
 class SubscribeForm(forms.Form):
@@ -29,9 +29,15 @@ class UnsubscribeForm(forms.Form):
     Keep in mind that the ``unsubscribe_hash`` field is important for
     validation. Regular users should not mess with it and both its hidden
     widget and misleading label are on purpose.
+
+    The ``newsletter_hash`` field is used in the case where the unsubscribe
+    URL was followed from within the content of a Newsletter.
     """
     unsubscribe_hash = forms.CharField(
-        widget=forms.HiddenInput(), label='name'
+        widget=forms.HiddenInput(), label='Name'
+    )
+    newsletter_hash = forms.CharField(
+        widget=forms.HiddenInput(), label='Last name', required=False
     )
     email = forms.EmailField(label="Your email")
 
@@ -39,6 +45,8 @@ class UnsubscribeForm(forms.Form):
         fields = ('unsubscribe_hash', 'email')
 
     def clean(self):
+        self.newsletter = None
+
         cleaned_data = super(UnsubscribeForm, self).clean()
 
         # Skip this, if the email field did not survive previous validation
@@ -64,10 +72,30 @@ class UnsubscribeForm(forms.Form):
                 'Please check that you have copied it correctly.'
             ))
 
+        newsletter_hash = self.cleaned_data.get('newsletter_hash')
+
+        if newsletter_hash:
+            pk = obfuscator.decode_single_value_hash(newsletter_hash)[0]
+            try:
+                newsletter = Newsletter.objects.get(pk=pk)
+            except Newsletter.DoesNotExist:
+                # NOTE: For this to happen, it is certain that the user is
+                # messing with the hidden fields of the form (ie is a
+                # "malicious" user. Remember that that the hash has been
+                # validated in the view that built this form's initial data)
+                raise ValidationError(_(
+                    'Please simply enter your email address'
+                ))
+            else:
+                self.newsletter = newsletter
+
         self.subscriber = subscriber
 
         return cleaned_data
 
     def save(self):
-        # ``self.subscriber`` has been assigned in ``self.clean()``
-        return self.subscriber.unsubscribe()
+        if self.newsletter:
+            self.newsletter.unsubscribe_recipient(self.subscriber)
+        else:
+            # ``self.subscriber`` has been assigned in ``self.clean()``
+            self.subscriber.unsubscribe()

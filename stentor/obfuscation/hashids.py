@@ -22,6 +22,9 @@ class HashIdsObfuscationBackend(BaseObfuscationBackend):
 
     # Encoders
 
+    def encode_single_value(self, value):
+        return self.hashids.encode(value)
+
     def encode_unsubscribe_hash(self, subscriber):
         ord_day_created = subscriber.creation_date.toordinal()
         return self.hashids.encode(ord_day_created, subscriber.pk)
@@ -38,6 +41,9 @@ class HashIdsObfuscationBackend(BaseObfuscationBackend):
         )
 
     # Decoders
+
+    def decode_single_value_hash(self, hash_string):
+        return self.hashids.decode(hash_string)
 
     def decode_unsubscribe_hash(self, hash_string):
         ord_day_created, subscriber_pk = self.hashids.decode(hash_string)

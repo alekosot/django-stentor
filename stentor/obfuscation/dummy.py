@@ -10,6 +10,9 @@ class DummyObfuscationBackend(BaseObfuscationBackend):
     """
     # Encoders
 
+    def encode_single_value(self, value):
+        return value
+
     def encode_unsubscribe_hash(self, subscriber):
         ord_day_created = subscriber.creation_date.toordinal()
         return '{}-{}'.format(ord_day_created, subscriber.pk)
@@ -24,6 +27,9 @@ class DummyObfuscationBackend(BaseObfuscationBackend):
         )
 
     # Decoders
+
+    def decode_single_value_hash(self, hash_string):
+        return hash_string
 
     def decode_unsubscribe_hash(self, hash_string):
         return hash_string.split('-')

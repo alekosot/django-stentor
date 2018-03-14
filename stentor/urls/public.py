@@ -23,6 +23,12 @@ urlpatterns = [
         public.SubscribeSuccessView.as_view(),
         name='subscriber.subscribe_success'),
 
+
+    url(r'^unsubscribe/'
+            r'(?P<unsubscribe_hash>[^/]\S+)/'  # NOQA
+            r'(?P<newsletter_hash>[^/]\S+)/$',  # NOQA
+        public.UnsubscribeView.as_view(),
+        name='subscriber.unsubscribe_from_newsletter'),
     url(r'^unsubscribe/(?P<unsubscribe_hash>[^/]\S+)/$',
         public.UnsubscribeView.as_view(),
         name='subscriber.unsubscribe'),
