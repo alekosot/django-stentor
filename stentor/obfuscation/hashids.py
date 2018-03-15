@@ -15,7 +15,7 @@ class HashIdsObfuscationBackend(BaseObfuscationBackend):
         available_settings = ['salt', 'min_length', 'alphabet']
         dikt = {}
         for setting in available_settings:
-            conf = getattr(stentor_conf.OBFUSCATION_SETTINGS, setting, None)
+            conf = stentor_conf.OBFUSCATION_SETTINGS.get(setting, None)
             if conf:
                 dikt[setting] = conf
         self.hashids = hashids.Hashids(**dikt)
