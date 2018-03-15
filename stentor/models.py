@@ -367,12 +367,24 @@ class Newsletter(models.Model):
     total_web_impressions.short_description = _('Web impressions')
 
     @cached_property
+    def all_impressions(self):
+        return list(chain(self.email_impressions, self.web_impressions))
+
+    @cached_property
     def total_impressions(self):
-        return len(list(chain(self.email_impressions, self.web_impressions)))
+        return len(self.all_impressions)
+
+    @cached_property
+    def total_distinct_email_impressions(self):
+        return len(set(self.email_impressions))
+
+    @cached_property
+    def total_distinct_web_impressions(self):
+        return len(set(self.web_impressions))
 
     @cached_property
     def distinct_impressions(self):
-        return set(chain(self.email_impressions, self.web_impressions))
+        return set(self.all_impressions)
 
     @cached_property
     def total_distinct_impressions(self):
