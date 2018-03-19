@@ -25,7 +25,6 @@ from django.utils.translation import ugettext as _
 from . import settings as stentor_conf
 from . import managers as stentor_managers
 from .utils import obfuscator, subscribe as subscribe_util
-from .validators import validate_template_choice
 
 
 @python_2_unicode_compatible
@@ -155,7 +154,8 @@ class Newsletter(models.Model):
     web_impressions = ArrayField(
         models.IntegerField(blank=True, null=True), default=list)
     unsubscriptions = ArrayField(
-        models.IntegerField(blank=True, null=True), default=list, help_text=_(
+        models.IntegerField(blank=True, null=True), default=list,
+        verbose_name='cancelled subscriptions', help_text=_(
             "The subscriptions that were cancelled through this newsletter's "
             '"unsubscribe" link.'))
 
@@ -488,11 +488,11 @@ class Newsletter(models.Model):
         else:
             subscriber_pk = subscriber
             try:
-                subscriber = Subscriber.objects.get(pk=subcriber_pk)
+                subscriber = Subscriber.objects.get(pk=subscriber_pk)
             except Subscriber.DoesNotExist:
                 raise ValueError(_(
                     'There is no Subscriber with pk equal to {}'
-                    .format(abssubscriber_pk)
+                    .format(subscriber_pk)
                 ))
         if subscriber_pk not in self.past_recipients:
             raise ValueError(
