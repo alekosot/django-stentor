@@ -7,13 +7,17 @@ from __future__ import unicode_literals
 
 import importlib
 
-from django.core.urlresolvers import reverse_lazy, resolve
 from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.template import Template, Context
 from django.template.loader import render_to_string
 from django.utils.module_loading import import_string
 from django.views.generic import FormView, TemplateView
+
+try:
+    from django.urls import reverse_lazy, resolve
+except ImportError:  # NOTE: Deprecation -- django < 2
+    from django.core.urlresolvers import reverse_lazy, resolve
 
 from .. import settings as stentor_conf
 from ..utils import obfuscator
