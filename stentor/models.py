@@ -54,7 +54,8 @@ class Subscriber(models.Model):
     A newsletter subscriber representation with minimal extra information.
     """
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, blank=True, null=True)
+        settings.AUTH_USER_MODEL, blank=True, null=True,
+        on_delete=models.SET_NULL)
     email = models.EmailField(max_length=255, unique=True, blank=True)
     is_active = models.BooleanField(default=True)
     mailing_lists = models.ManyToManyField(MailingList)
@@ -527,8 +528,8 @@ class ScheduledSending(models.Model):
     In the current implementation a cron job is responsible for doing the
     actual sending.
     """
-    subscriber = models.ForeignKey(Subscriber)
-    newsletter = models.ForeignKey(Newsletter)
+    subscriber = models.ForeignKey(Subscriber, on_delete=models.CASCADE)
+    newsletter = models.ForeignKey(Newsletter, on_delete=models.CASCADE)
     sending_date = models.DateTimeField()
     message = models.TextField(blank=True)
 
