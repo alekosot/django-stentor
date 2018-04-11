@@ -2,11 +2,23 @@
 from __future__ import unicode_literals
 
 from django import forms
+from django.contrib.admin import widgets
 from django.utils.translation import ugettext_lazy as _
 
 from stentor.utils import obfuscator, subscribe
 
 from .models import Subscriber, Newsletter
+
+
+class ScheduleNewsletterForm(forms.Form):
+    """
+    A form for scheduling the chosen newsletters for sendind, used in an
+    intedmediate action in newsletter's admin page.
+    """
+    slug = forms.CharField(required=False, widget=forms.HiddenInput)
+    subject = forms.CharField(required=False, widget=forms.HiddenInput)
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    chosen_date = forms.SplitDateTimeField(widget=widgets.AdminSplitDateTime())
 
 
 class SubscribeForm(forms.Form):

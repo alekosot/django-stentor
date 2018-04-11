@@ -3,7 +3,12 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.contrib import admin
+from django.contrib.admin import helpers
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.utils.translation import ugettext as _
 
+from .forms import ScheduleNewsletterForm
 from . import settings as stentor_conf
 from .models import MailingList, Subscriber, Newsletter, ScheduledSending
 from .utils import TEMPLATE_CHOICES
@@ -64,10 +69,47 @@ class NewsletterAdmin(admin.ModelAdmin):
     )
 
     def schedule_sending(self, request, queryset):
-        for newsletter in queryset:
-            newsletter.schedule_sending()
+        form = None
+        if 'add' in request.POST:
+            form = ScheduleNewsletterForm(request.POST)
+
+            if form.is_valid():
+                chosen_date = form.cleaned_data['chosen_date']
+
+                for newsletter in queryset:
+                    newsletter.schedule_sending(when=chosen_date)
+
+                newsletter_cnt = queryset.count()
+                success_msg = "Successfully scheduled {} newsletter{}".format(
+                    newsletter_cnt, '' if newsletter_cnt == 1 else 's')
+                success_msg += " for {:%d %B %Y at %H:%M %p}.".format(
+                    chosen_date)
+                self.message_user(request, success_msg)
+                return HttpResponseRedirect(request.get_full_path())
+
+        if not form:
+            form = ScheduleNewsletterForm(initial={
+                '_selected_action': request.POST.getlist(
+                    admin.ACTION_CHECKBOX_NAME)
+            })
+
+        context = {
+            'title': _("Choose sending date"),
+            'newsletters': queryset,
+            'app_label': self.model._meta.app_label,
+            'opts': self.model._meta,
+            'site_url': '/',
+            'has_permission': request.user.has_perm('stentor.add_newsletter'),
+            'has_change_permission': self.has_change_permission(request)
+        }
+        context['adminform'] = helpers.AdminForm(
+            form,
+            list([(None, {'fields': form.base_fields})]),
+            self.get_prepopulated_fields(request))
+
+        return render(request, 'stentor/choose_sending_date_form.html', context)
     schedule_sending.short_description = (
-        'Schedule the selected newsletters for sending (as soon as possible)'
+        'Schedule the selected newsletters for sending'
     )
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
