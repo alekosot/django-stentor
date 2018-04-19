@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from . import settings as stentor_conf
+from django.utils import timezone
 from django.utils.module_loading import import_string
 
 
@@ -36,3 +37,48 @@ def subscribe(email, add_to_default=True, mailing_lists=None, subscriber=None):
     subscriber.mailing_lists.add(*mailing_list_ids)
 
     return subscriber
+
+
+def subscribe_multiple(emails, add_to_default=True, mailing_lists=None):
+    """
+    TODO
+    """
+    from .models import Subscriber
+
+    # Fetch all emails and keep the unique emails that aren't already
+    # subscribed so we can create them. Also keep the emails that are
+    # already subscribed so we can update their mailing lists.
+    imported_emails = set(emails)
+    all_emails = set(Subscriber.objects.values_list('email', flat=True))
+    new_emails = imported_emails - all_emails
+    existing_emails = all_emails & imported_emails
+
+    # Create instances for new subscribers and bulk create them
+    now = timezone.now()
+    new_subscribers = [
+        Subscriber(email=email, creation_date=now, update_date=now)
+        for email in new_emails
+    ]
+    created_subscribers = Subscriber.objects.bulk_create(new_subscribers)
+
+    # NOTE possible race condition?
+    # Create subscribers and mailing lists through table instances
+    # and bulk insert them to the through model.
+    SubscriberThroughModel = Subscriber.mailing_lists.through
+    subscriber_through_instances = [
+        SubscriberThroughModel(
+            subscriber_id=subscriber.id,
+            mailinglist_id=mailing_list.id
+        )
+        for subscriber in created_subscribers
+        for mailing_list in mailing_lists
+    ]
+    SubscriberThroughModel.objects.bulk_create(subscriber_through_instances)
+
+    # Update the mailing lists of existing subscribers
+    mailing_list_ids = [mlist.id for mlist in mailing_lists]
+    existing_subscribers = Subscriber.objects.filter(email__in=existing_emails)
+    for subscriber in existing_subscribers:
+        subscriber.mailing_lists.add(*mailing_list_ids)
+
+    return (len(new_subscribers), len(existing_subscribers))

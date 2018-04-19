@@ -10,14 +10,60 @@ from django.utils.translation import ugettext as _
 
 from .forms import ScheduleNewsletterForm
 from . import settings as stentor_conf
+from .forms import MultipleSubscribersForm
 from .models import MailingList, Subscriber, Newsletter, ScheduledSending
-from .utils import TEMPLATE_CHOICES
+from .utils import TEMPLATE_CHOICES, subscribe_multiple
 
 
 @admin.register(MailingList)
 class MailingListAdmin(admin.ModelAdmin):
     fields = ('name',)
     list_display = ('name',)
+    actions = ('add_multiple_subscribers',)
+
+    def add_multiple_subscribers(self, request, queryset):
+        form = None
+        if 'add' in request.POST:
+            form = MultipleSubscribersForm(request.POST)
+
+            if form.is_valid():
+                emails = form.cleaned_data['emails']
+                created_cnt, updated_cnt = subscribe_multiple(
+                    emails, mailing_lists=queryset)
+
+                success_msg = "Successfully added {} new subscriber{}".format(
+                    created_cnt, '' if created_cnt == 1 else 's')
+                if updated_cnt:
+                    success_msg += " and updated {} existing subscriber{}".format(
+                        updated_cnt, '' if updated_cnt == 1 else 's')
+                success_msg += "."
+
+                self.message_user(request, success_msg)
+                return HttpResponseRedirect(request.get_full_path())
+
+        if not form:
+            form = MultipleSubscribersForm(initial={
+                '_selected_action': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+            })
+
+        context={
+            'title': _("Add multiple subscribers"),
+            'mailing_lists': queryset,
+            'app_label': self.model._meta.app_label,
+            'opts': self.model._meta,
+            'site_url': '/',
+            'has_permission': request.user.has_perm('stentor.add_subscriber'),
+            'has_change_permission': self.has_change_permission(request)
+        }
+        context['adminform'] = helpers.AdminForm(
+            form,
+            list([(None, {'fields': form.base_fields})]),
+            self.get_prepopulated_fields(request))
+
+        return render(request, 'stentor/multiple_subscribers_form.html', context)
+    add_multiple_subscribers.short_description = (_(
+        'Add multiple subscribers to the selected mailing lists'))
+
 
 
 @admin.register(Subscriber)
