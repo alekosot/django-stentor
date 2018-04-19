@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import re
 
 from django import forms
+from django.contrib.admin import widgets
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
@@ -49,6 +50,17 @@ class MultipleSubscribersForm(forms.Form):
     emails = MultiEmailField(
         widget=forms.Textarea(attrs={'rows': 20, 'cols': 40})
     )
+
+
+class ScheduleNewsletterForm(forms.Form):
+    """
+    A form for scheduling the chosen newsletters for sendind, used in an
+    intedmediate action in newsletter's admin page.
+    """
+    slug = forms.CharField(required=False, widget=forms.HiddenInput)
+    subject = forms.CharField(required=False, widget=forms.HiddenInput)
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    chosen_date = forms.SplitDateTimeField(widget=widgets.AdminSplitDateTime())
 
 
 class SubscribeForm(forms.Form):
