@@ -45,6 +45,7 @@ class SubscriberQuerySet(models.QuerySet):
             .filter(newsletter=newsletter)  \
             .values_list('subscriber', flat=True)
         return self \
+            .active() \
             .recipients_remaining_for(newsletter) \
             .exclude(pk__in=scheduled_subscribers)
 
