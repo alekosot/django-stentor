@@ -44,10 +44,17 @@ class SubscriberQuerySet(models.QuerySet):
         scheduled_subscribers = ScheduledSending.objects  \
             .filter(newsletter=newsletter)  \
             .values_list('subscriber', flat=True)
-        return self \
+        subscribers = self \
             .active() \
             .recipients_remaining_for(newsletter) \
             .exclude(pk__in=scheduled_subscribers)
+
+        # Hook for customizing the ScheduledSending
+        processors = stentor_conf.SCHEDULABLE_RECIPIENTS_PROCESSORS
+        for processor in processors:
+            subscribers = processor(subscribers, newsletter)
+
+        return subscribers
 
 
 class SubscriberManager(models.Manager):
