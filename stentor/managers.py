@@ -6,6 +6,7 @@ from itertools import chain
 from django.core import mail
 from django.db import models
 from django.utils import timezone, six
+from django.utils.module_loading import import_string
 
 from . import settings as stentor_conf
 from . import checks as stentor_checks
@@ -50,8 +51,9 @@ class SubscriberQuerySet(models.QuerySet):
             .exclude(pk__in=scheduled_subscribers)
 
         # Hook for customizing the ScheduledSending
-        processors = stentor_conf.SCHEDULABLE_RECIPIENTS_PROCESSORS
-        for processor in processors:
+        processor_strings = stentor_conf.SCHEDULABLE_RECIPIENTS_PROCESSORS
+        for processor_str in processor_strings:
+            processor = import_string(processor_str)
             subscribers = processor(subscribers, newsletter)
 
         return subscribers

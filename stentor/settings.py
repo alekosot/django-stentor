@@ -96,9 +96,11 @@ SCHEDULED_SENDING_BATCH_SIZE = getattr(
     250
 )
 
-# An iterable of callables that accept a collection of Subscribers and a
-# Newsletter instance and return a collection of Subscribers. This can be
-# used to filter out the Subscribers that will receive a Newsletter.
+
+# An iterable of strings, representing paths to callables that accept a
+# collection of Subscribers and a Newsletter instance and return a collection
+# of Subscribers. This can be used to filter the Subscribers that will
+# receive a Newsletter.
 SCHEDULABLE_RECIPIENTS_PROCESSORS = getattr(
     settings,
     'STENTOR_SCHEDULABLE_RECIPIENTS_PROCESSORS',
