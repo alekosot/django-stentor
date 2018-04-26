@@ -46,6 +46,9 @@ class BaseObfuscationBackend(object):
     def encode_web_view_hash(self, sending):
         raise NotImplementedError('Subclasses must implement this')
 
+    def encode_generic_identifier_hash(self, sending):
+        raise NotImplementedError('Subclasses must implement this')
+
     # Decoders
 
     def decode_single_value_hash(self, hash_string):
@@ -75,5 +78,12 @@ class BaseObfuscationBackend(object):
         Should return the pk of a Subscriber instance and the pk of a
         Newsletter instance (in this order), or raise a
         ``django.core.exceptions.ObjectDoesNotExist`` exception.
+        """
+        raise NotImplementedError('Subclasses must implement this')
+
+    def decode_generic_identifier_hash(self, hash_string):
+        """
+        Return a tuple containing the Subscriber pk, the Newsletter pk and the
+        ScheduledSending pk.
         """
         raise NotImplementedError('Subclasses must implement this')

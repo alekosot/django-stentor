@@ -604,3 +604,6 @@ class ScheduledSending(models.Model):
     def get_unsubscribe_url(self):
         hash_string = obfuscator.encode_single_value(self.newsletter_id)
         return self.subscriber.get_unsubscribe_url() + hash_string + '/'
+
+    def get_generic_identifier_hash(self):
+        return obfuscator.encode_generic_identifier_hash(self)

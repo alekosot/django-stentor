@@ -7,6 +7,8 @@ from django.template.loader import render_to_string
 from django.utils import six
 
 from stentor import settings as stentor_conf
+from stentor.utils import obfuscator
+
 
 if not stentor_conf.PUBLIC_SITE_URL:
     try:
@@ -58,3 +60,8 @@ def unsubscribe_url(context):
     ctx = {key: value for key, value in six.iteritems(ctx_dict)}
     html = render_to_string('stentor/partials/unsubscribe_url.html', ctx)
     return html.strip()
+
+
+@register.simple_tag(takes_context=True)
+def generic_identifier(context):
+    return context['sending'].get_generic_identifier_hash()

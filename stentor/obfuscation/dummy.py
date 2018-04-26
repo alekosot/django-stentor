@@ -26,6 +26,13 @@ class DummyObfuscationBackend(BaseObfuscationBackend):
             sending.subscriber.pk
         )
 
+    def encode_generic_identifier_hash(self, sending):
+        return '{}-{}-{}'.format(
+            sending.subscriber.pk,
+            sending.newsletter.pk,
+            sending.pk
+        )
+
     # Decoders
 
     def decode_single_value_hash(self, hash_string):
@@ -38,6 +45,9 @@ class DummyObfuscationBackend(BaseObfuscationBackend):
         return hash_string.split('-')
 
     def decode_web_view_hash(self, hash_string):
+        return hash_string.split('-')
+
+    def decode_generic_identifier_hash(self, hash_string):
         return hash_string.split('-')
 
 

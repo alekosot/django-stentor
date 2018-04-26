@@ -40,6 +40,13 @@ class HashIdsObfuscationBackend(BaseObfuscationBackend):
             sending.subscriber_id
         )
 
+    def encode_generic_identifier_hash(self, sending):
+        return self.hashids.encode(
+            sending.subscriber_id,
+            sending.newsletter.pk,
+            sending.pk
+        )
+
     # Decoders
 
     def decode_single_value_hash(self, hash_string):
@@ -53,6 +60,9 @@ class HashIdsObfuscationBackend(BaseObfuscationBackend):
         return self.hashids.decode(hash_string)
 
     def decode_web_view_hash(self, hash_string):
+        return self.hashids.decode(hash_string)
+
+    def decode_generic_identifier_hash(self, hash_string):
         return self.hashids.decode(hash_string)
 
 
