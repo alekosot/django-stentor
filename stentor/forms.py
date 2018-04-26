@@ -10,7 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from stentor.utils import obfuscator, subscribe
 
-from .models import Subscriber, MailingList
+from .models import Subscriber, Newsletter
 
 
 class MultiEmailField(forms.Field):
