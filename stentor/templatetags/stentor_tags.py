@@ -52,4 +52,8 @@ def unsubscribe_url(context):
 
 @register.simple_tag(takes_context=True)
 def generic_identifier(context):
-    return context['sending'].get_generic_identifier_hash()
+    if 'sending' in context:
+        hash = context['sending'].get_generic_identifier_hash()
+    else:
+        hash = '!-' + obfuscator.encode_unsubscribe_hash(context['subscriber'])
+    return hash
