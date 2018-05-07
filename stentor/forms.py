@@ -33,12 +33,20 @@ class MultiEmailField(forms.Field):
         Check if value consists only of valid emails.
         """
         super().validate(value)
-        try:
-            [validate_email(email) for email in value]
-        except:
+
+        invalid_emails = []
+        for email in value:
+            try:
+                validate_email(email)
+            except ValidationError:
+                invalid_emails += [email]
+
+        print(invalid_emails)
+        if invalid_emails:
             raise forms.ValidationError(_(
-                'Some of the emails you entered are invalid.'
-            ))
+                'The following emails you entered are invalid: {}')
+                .format(', '.join(invalid_emails))
+            )
 
 
 class MultipleSubscribersForm(forms.Form):
