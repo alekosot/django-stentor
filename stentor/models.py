@@ -173,7 +173,7 @@ class Newsletter(models.Model):
 
     def save(self, *args, **kwargs):
         stentor_slugify = stentor_conf.SLUGIFY
-        if not self.pk and stentor_slugify is not None:
+        if not self.pk and not self.slug:
             if stentor_slugify:
                 self.slug = stentor_slugify(self)
             else:
