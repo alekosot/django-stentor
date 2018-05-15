@@ -2,25 +2,13 @@
 from __future__ import unicode_literals
 
 from django import template
-from django.core.exceptions import ImproperlyConfigured
 from django.template.loader import render_to_string
 from django.utils import six
 
-from stentor import settings as stentor_conf
-from stentor.utils import obfuscator
+from stentor.utils import get_public_site_url
 
 
-if not stentor_conf.PUBLIC_SITE_URL:
-    try:
-        from django.contrib.sites.models import Site
-    except ImportError:
-        raise ImproperlyConfigured(
-            'You must either set the STENTOR_PUBLIC_SITE_URL setting '
-            'or have the django.contrib.sites app installed and set up.')
-    else:
-        public_site_url = 'https://' + Site.objects.get_current().domain
-else:
-    public_site_url = stentor_conf.PUBLIC_SITE_URL
+public_site_url = get_public_site_url()
 
 
 register = template.Library()

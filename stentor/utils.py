@@ -1,14 +1,39 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from . import settings as stentor_conf
+from django.core.exceptions import ImproperlyConfigured
 from django.utils import timezone
 from django.utils.module_loading import import_string
+
+from . import settings as stentor_conf
 
 
 obfuscator = import_string(stentor_conf.OBFUSCATION_BACKEND)
 
 TEMPLATE_CHOICES = tuple((name, name) for name in stentor_conf.TEMPLATES)
+
+
+def get_public_site_url(with_protocol=True):
+    if not stentor_conf.PUBLIC_SITE_URL:
+        except_msg = (
+            'You must either set the STENTOR_PUBLIC_SITE_URL setting '
+            'or have the django.contrib.sites app installed and set up.'
+        )
+
+        try:
+            from django.contrib.sites.models import Site
+        except RuntimeError:
+            raise ImproperlyConfigured(except_msg)
+        else:
+            try:
+                public_site_url = 'https://' if with_protocol else ''
+                public_site_url += Site.objects.get_current().domain
+            except ImproperlyConfigured:
+                except_msg += "It seems you haven't set the SITE_ID setting."
+                raise ImproperlyConfigured(except_msg)
+
+    else:
+        public_site_url = stentor_conf.PUBLIC_SITE_URL
 
 
 # TODO: Add test
