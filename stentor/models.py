@@ -13,7 +13,7 @@ from django.core.mail import EmailMessage
 from django.core.mail import send_mail
 from django.db import models
 from django.template import Template, Context
-from django.template.loader import get_template
+from django.template.loader import get_template, render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
@@ -81,12 +81,29 @@ class Subscriber(models.Model):
         self.clean()
         now = timezone.now()
         self.update_date = now
-        if not self.creation_date:
+        is_new_instance = not self.creation_date
+        if is_new_instance:
             self.creation_date = now
-        return super(Subscriber, self).save(*args, **kwargs)
+        instance = super(Subscriber, self).save(*args, **kwargs)
+        if is_new_instance and stentor_conf.SUBSCRIPTION_CONFIRMATION:
+            self.confirm_email()
+        return instance
 
     def get_email(self):
         return self.email or self.user.email
+
+    def confirm_email(self):
+        html = render_to_string(
+            'stentor/subscribe_confirmation_email.html',
+            {'subscriber': self}
+        )
+        send_mail(
+            stentor_conf.SUBSCRIPTION_CONFIRMATION_SUBJECT,
+            '',
+            stentor_conf.SENDER_VERBOSE,
+            (self.email,),
+            html_message=html
+        )
 
     def subscribe(self, mailing_lists=None):
         return subscribe_util(email=self.email, mailing_lists=mailing_lists)

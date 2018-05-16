@@ -119,6 +119,28 @@ SUBSCRIBE_FORM = getattr(
     'stentor.forms.SubscribeForm'
 )
 
+
+# If this evaluates to True, then a subscription confirmation email will be
+# sent to all new Subscribers.
+# NOTE: Setting this to a truthy value will require of you to create a
+# `stentor/subscribe_confirmation_email.html` template as well. Stentor does
+# not provide this.
+# TODO: Add a check that looks for the existence of the template.
+SUBSCRIPTION_CONFIRMATION = getattr(
+    settings,
+    'STENTOR_SUBSCRIPTION_CONFIRMATION',
+    False
+)
+
+
+# If SUBSCRIPTION_CONFIRMATION is truthy, the subject of the confirmation
+# email will be this value.
+SUBSCRIPTION_CONFIRMATION_SUBJECT = getattr(
+    settings,
+    'STENTOR_SUBSCRIPTION_CONFIRMATION_SUBJECT',
+    'Thank you for subscribing to our newsletter'
+)
+
 TEMPLATES = getattr(
     settings,
     'STENTOR_TEMPLATES',
