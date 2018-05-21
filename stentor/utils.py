@@ -35,6 +35,8 @@ def get_public_site_url(with_protocol=True):
     else:
         public_site_url = stentor_conf.PUBLIC_SITE_URL
 
+    return public_site_url
+
 
 # TODO: Add test
 def subscribe(email, add_to_default=True, mailing_lists=None, subscriber=None):
