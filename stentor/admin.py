@@ -104,7 +104,7 @@ class NewsletterAdmin(admin.ModelAdmin):
         'total_distinct_unsubscriptions',
         'distinct_unsubscription_rate_as_percentage'
     )
-    actions = ('schedule_sending',)
+    actions = ('schedule_sending', 'clear_statistics')
     prepopulated_fields = {'slug': ('subject', )}
     readonly_fields = (
         'total_pending_sendings', 'total_past_recipients',
@@ -163,6 +163,13 @@ class NewsletterAdmin(admin.ModelAdmin):
         if db_field.name == 'template':
             return forms.ChoiceField(choices=TEMPLATE_CHOICES)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def clear_statistics(self, request, queryset):
+        for newsletter in queryset:
+            newsletter.clear_statistics()
+    clear_statistics.short_description = (
+        'Irreversibly clear all statistics of the selected newsletters'
+    )
 
 
 @admin.register(ScheduledSending)
