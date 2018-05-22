@@ -34,6 +34,9 @@ class BaseObfuscationBackend(object):
     def encode_single_value(self, int):
         raise NotImplementedError('Subclasses must implement this')
 
+    def encode_multiple_values(self, *args):
+        raise NotImplementedError('Subclasses must implement this')
+
     def encode_unsubscribe_hash(self, subscriber):
         """
         This must take into account the creation date of the Subscriber.
@@ -41,13 +44,32 @@ class BaseObfuscationBackend(object):
         raise NotImplementedError('Subclasses must implement this')
 
     def encode_email_tracker_hash(self, sending):
-        raise NotImplementedError('Subclasses must implement this')
+        return self.encode_multiple_values(
+            sending.newsletter.pk,
+            sending.subscriber.pk
+        )
 
     def encode_web_view_hash(self, sending):
-        raise NotImplementedError('Subclasses must implement this')
+        return self.encode_multiple_values(
+            sending.newsletter.pk,
+            sending.subscriber.pk
+        )
 
-    def encode_generic_identifier_hash(self, sending):
-        raise NotImplementedError('Subclasses must implement this')
+    def encode_generic_identifier_hash(
+            self, sending=None, newsletter=None, subscriber=None):
+        if not sending:
+            if not newsletter and not subscriber:
+                raise ValueError(
+                    'You must provide either a ScheduledSending instance or '
+                    'both a Newsletter instance and a Subscriber instance '
+                    'as arguments')
+            newsletter_pk = newsletter.pk
+            subscriber_pk = subscriber.pk
+        else:
+            newsletter_pk = sending.newsletter.pk
+            subscriber_pk = sending.subscriber.pk
+
+        return self.encode_multiple_values(newsletter_pk, subscriber_pk)
 
     # Decoders
 
@@ -57,33 +79,36 @@ class BaseObfuscationBackend(object):
         """
         raise NotImplementedError('Subclasses must implement this')
 
+    def decode_multiple_value_hash(self, hash_string):
+        """
+        Return all the integers represented by the hash.
+        """
+        raise NotImplementedError('Subclasses must implement this')
+
     def decode_unsubscribe_hash(self, hash_string):
         """
-        Should return the creation date of the Subsriber (as an ordinal) and
-        the pk of a Subscriber instance or raise an ``ObjectDoesNotExist``
-        exception.
+        Return the creation date of the Subsriber (as an ordinal) and
+        the pk of a Subscriber instance.
         """
         raise NotImplementedError('Subclasses must implement this')
 
     def decode_email_tracker_hash(self, hash_string):
         """
-        Should return the pk of a Subscriber instance and the pk of a
-        Newsletter instance (in this order), or raise an ``ObjectDoesNotExist``
-        exception.
+        Return the pk of a Subscriber instance and the pk of a
+        Newsletter instance (in this order).
         """
-        raise NotImplementedError('Subclasses must implement this')
+        return self.decode_multiple_value_hash(hash_string)
 
     def decode_web_view_hash(self, hash_string):
         """
-        Should return the pk of a Subscriber instance and the pk of a
-        Newsletter instance (in this order), or raise a
-        ``django.core.exceptions.ObjectDoesNotExist`` exception.
+        Return the pk of a Subscriber instance and the pk of a
+        Newsletter instance (in this order).
         """
-        raise NotImplementedError('Subclasses must implement this')
+        return self.decode_multiple_value_hash(hash_string)
 
     def decode_generic_identifier_hash(self, hash_string):
         """
-        Return a tuple containing the Subscriber pk, the Newsletter pk and the
-        ScheduledSending pk.
+        Return the pk of a Subscriber instance and the pk of a
+        Newsletter instance (in this order).
         """
-        raise NotImplementedError('Subclasses must implement this')
+        return self.decode_multiple_value_hash(hash_string)

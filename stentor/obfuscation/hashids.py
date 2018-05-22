@@ -25,45 +25,24 @@ class HashIdsObfuscationBackend(BaseObfuscationBackend):
     def encode_single_value(self, value):
         return self.hashids.encode(value)
 
+    def encode_multiple_values(self, *args):
+        return self.hashids.encode(*args)
+
     def encode_unsubscribe_hash(self, subscriber):
         ord_day_created = subscriber.creation_date.toordinal()
         return self.hashids.encode(ord_day_created, subscriber.pk)
-
-    def encode_email_tracker_hash(self, sending):
-        return self.hashids.encode(
-            sending.newsletter.pk, sending.subscriber.pk
-        )
-
-    def encode_web_view_hash(self, sending):
-        return self.hashids.encode(
-            sending.newsletter.pk,
-            sending.subscriber_id
-        )
-
-    def encode_generic_identifier_hash(self, sending):
-        return self.hashids.encode(
-            sending.subscriber_id,
-            sending.newsletter.pk,
-            sending.pk
-        )
 
     # Decoders
 
     def decode_single_value_hash(self, hash_string):
         return self.hashids.decode(hash_string)
 
+    def decode_multiple_value_hash(self, hash_string):
+        return self.hashids.decode(hash_string)
+
     def decode_unsubscribe_hash(self, hash_string):
         ord_day_created, subscriber_pk = self.hashids.decode(hash_string)
         return str(ord_day_created), subscriber_pk
-
-    def decode_email_tracker_hash(self, hash_string):
-        return self.hashids.decode(hash_string)
-
-    def decode_web_view_hash(self, hash_string):
-        return self.hashids.decode(hash_string)
-
-    def decode_generic_identifier_hash(self, hash_string):
-        return self.hashids.decode(hash_string)
 
 
 backend = HashIdsObfuscationBackend()

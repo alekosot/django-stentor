@@ -13,41 +13,22 @@ class DummyObfuscationBackend(BaseObfuscationBackend):
     def encode_single_value(self, value):
         return value
 
+    def encode_multiple_values(self, *args):
+        return '-'.join(*args)
+
     def encode_unsubscribe_hash(self, subscriber):
         ord_day_created = subscriber.creation_date.toordinal()
         return '{}-{}'.format(ord_day_created, subscriber.pk)
-
-    def encode_email_tracker_hash(self, sending):
-        return '{}-{}'.format(sending.newsletter.pk, sending.subscriber.pk)
-
-    def encode_web_view_hash(self, sending):
-        return '{}-{}'.format(
-            sending.newsletter.pk,
-            sending.subscriber.pk
-        )
-
-    def encode_generic_identifier_hash(self, sending):
-        return '{}-{}-{}'.format(
-            sending.subscriber.pk,
-            sending.newsletter.pk,
-            sending.pk
-        )
 
     # Decoders
 
     def decode_single_value_hash(self, hash_string):
         return hash_string
 
+    def decode_multiple_value_hash(self, hash_string):
+        return hash_string.split('-')
+
     def decode_unsubscribe_hash(self, hash_string):
-        return hash_string.split('-')
-
-    def decode_email_tracker_hash(self, hash_string):
-        return hash_string.split('-')
-
-    def decode_web_view_hash(self, hash_string):
-        return hash_string.split('-')
-
-    def decode_generic_identifier_hash(self, hash_string):
         return hash_string.split('-')
 
 

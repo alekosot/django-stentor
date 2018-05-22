@@ -5,7 +5,7 @@ from django import template
 from django.template.loader import render_to_string
 from django.utils import six
 
-from stentor.utils import get_public_site_url
+from stentor.utils import get_public_site_url, obfuscator
 
 
 public_site_url = get_public_site_url()
@@ -52,4 +52,11 @@ def unsubscribe_url(context):
 
 @register.simple_tag(takes_context=True)
 def generic_identifier(context):
-    return context['sending'].get_generic_identifier_hash()
+    if 'sending' in context:
+        hash = context['sending'].get_generic_identifier_hash()
+    else:  # This is the case of the web view normally
+        # TODO: Handle anonymous views (i.e. no subscriber)
+        hash = obfuscator.encode_generic_identifier_hash(
+            newsletter=context['newsletter'],
+            subscriber=context['subscriber'])
+    return hash
