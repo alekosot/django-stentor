@@ -104,7 +104,7 @@ class NewsletterAdmin(admin.ModelAdmin):
         'total_distinct_unsubscriptions',
         'distinct_unsubscription_rate_as_percentage'
     )
-    actions = ('schedule_sending', 'clear_statistics')
+    actions = ('schedule_sending')
     prepopulated_fields = {'slug': ('subject', )}
     readonly_fields = (
         'total_pending_sendings', 'total_past_recipients',
