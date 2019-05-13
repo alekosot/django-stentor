@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from django.utils import six
 
 from stentor.utils import get_public_site_url, obfuscator
+from stentor.models import Subscriber
 
 
 public_site_url = get_public_site_url()
@@ -60,3 +61,9 @@ def generic_identifier(context):
             newsletter=context['newsletter'],
             subscriber=context['subscriber'])
     return hash
+
+
+@register.simple_tag
+def is_subscribable_email(email):
+    return Subscriber.objects \
+        .filter(email=email, is_active=True).exists()
