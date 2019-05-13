@@ -65,5 +65,5 @@ def generic_identifier(context):
 
 @register.simple_tag
 def is_subscribable_email(email):
-    return Subscriber.objects \
+    return not Subscriber.objects \
         .filter(email=email, is_active=True).exists()
