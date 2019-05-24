@@ -51,7 +51,7 @@ def subscribe(email, add_to_default=True, mailing_lists=None, subscriber=None):
     # Mark the subscriber as active:
     # - if it's a new subscriber and no subscription confirmation is needed
     # - if it's an existing subscriber and not already active
-    if (created and not stentor_conf.SUBSCRIPTION_CONFIRMATION)
+    if (created and not stentor_conf.SUBSCRIPTION_CONFIRMATION)  \
             or (not created and not subscriber.is_active):
         subscriber.is_active = True
         subscriber.save()
