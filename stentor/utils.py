@@ -38,15 +38,33 @@ def get_public_site_url(with_protocol=True):
     return public_site_url
 
 
-# TODO: Add test
-def subscribe(email, add_to_default=True, mailing_lists=None, subscriber=None):
+# TODO: Add tests
+# TODO: Document the change in the function signature
+def subscribe(subscriber, to=None, to_default=True):
     """
-    TODO
+    Subscribe the subscriber given.
+
+    `subscriber` may be either a `Subscriber` instance or the email to
+    subscribe. If a `Subscriber` with this email exists already, it's used
+    instead.
+
+    `to` is checked to be (in this order) a `MailingList` name, pk, instance or
+    queryset, or failing those, an iterable of `MailingList` names, primary
+    keys or instances. If names or pks are given, the corresponding
+    `MailingList`s should exist already.
+
+    If `to_default` is `True`, a subscription to the "default" `MailingList`
+    will take place as well.
+
+    **WARNING**: Depending on the parameters, this may result in the
+    `Subscriber` not having been subscribed to *any* `MailingList`s. This may
+    be a desired behavior, so it's tolerated.
     """
     from .models import Subscriber, MailingList
 
-    if not subscriber:
-        subscriber, created = Subscriber.objects.get_or_create(email=email)
+    if type(subscriber) != Subscriber:
+        subscriber, created = Subscriber.objects \
+            .get_or_create(email=subscriber)
 
     # Mark the subscriber as active:
     # - if it's a new subscriber and no subscription confirmation is needed
@@ -56,16 +74,43 @@ def subscribe(email, add_to_default=True, mailing_lists=None, subscriber=None):
         subscriber.is_active = True
         subscriber.save()
 
-    mailing_list_ids = []
+    mailing_lists = MailingList.objects.none()  # initial qs to merge others to
+    MailingListQuerySet = type(mailing_lists)
 
-    if add_to_default:
-        default_mailing_lists = MailingList.objects.default()
-        mailing_list_ids += [mlist.id for mlist in default_mailing_lists]
+    if to:
+        if type(to) == str:
+            # Assume it's a MailingList's title
+            mailing_lists |= MailingList.objects.filter(name=to)
+        elif type(to) == int:
+            # Assume it's a MailingList's pk
+            mailing_lists |= MailingList.objects.filter(pk=to)
+        elif isinstance(to, MailingList):
+            # TODO: This is simple, but a bit inefficient
+            mailing_lists |= MailingList.objects.filter(pk=to.pk)
+        elif issubclass(to, type(MailingListQuerySet)):
+            mailing_lists |= to
+        else:
+            # Assume it's an iterable of...
+            if all([type(i) == str for i in to]):
+                # ... MailingList names
+                mailing_lists |= MailingList.objects.filter(name__in=to)
+            elif all([type(i) == int for i in to]):
+                # ... MailingList pks
+                mailing_lists |= MailingList.objects.filter(pk__in=to)
+            elif all([isinstance(i, MailingList) for i in to]):
+                # ... MailingList instances
+                mailing_lists |= MailingList.objects  \
+                    .filter(pk__in=[mailing_list.pk for mailing_list in to])
+            else:
+                raise TypeError(
+                    '"to" must be a MailingList name, pk, instance, queryset '
+                    'or an iterable of MailingList names, pks or instances.')
 
-    if mailing_lists:
-        mailing_list_ids += [mlist.id for mlist in mailing_lists]
+    if to_default:
+        mailing_lists |= MailingList.objects.default()
 
-    subscriber.mailing_lists.add(*mailing_list_ids)
+    mailing_list_pks = mailing_lists.values_list('pk', flat=True)
+    subscriber.mailing_lists.add(*mailing_list_pks)
 
     return subscriber
 
