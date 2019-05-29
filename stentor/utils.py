@@ -109,8 +109,7 @@ def subscribe(subscriber, to=None, to_default=True):
     if to_default:
         mailing_lists |= MailingList.objects.default()
 
-    mailing_list_pks = mailing_lists.values_list('pk', flat=True)
-    subscriber.mailing_lists.add(*mailing_list_pks)
+    subscriber.mailing_lists.add(*mailing_lists)
 
     return subscriber
 
